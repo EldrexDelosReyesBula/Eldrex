@@ -1217,345 +1217,369 @@
         height: 20px;
     }
 
-/* Ensures styles only apply inside the container */
-.client-cards-container .client-card {
-  background: #f8f8f8;
-  margin: 20px;
-  padding: 20px;
-  border-radius: 30px;
-  display: flex;
-  flex-direction: column; /* Always stack vertically */
-  align-items: flex-start; /* Align content to the left */
-  gap: 15px; /* Space between logo and text */
-}
-
-.client-cards-container .client-card img {
-  height: 40px;
-  margin-bottom: 5px; /* Extra space below logo */
-}
-
-.client-card-text {
-  width: 100%; /* Take full width */
-padding: 20px;
-}
-
-.client-cards-container .client-card-text p {
-  margin: 0;
-  font-size: 14px;
-  color: #777;
-}
-
-.client-cards-container .client-card-text h4 {
-  margin: 0 0 5px 0; /* Space below title */
-  font-size: 16px;
-  font-weight: 500;
-  color: #000;
-}
-
-/* No need for media query since we want same layout everywhere */
-.media-section {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-}
-
-.media-title {
-    font-size: 1.2rem;
-    font-weight: 500;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.media-gallery {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-.media-item {
-    width: 600px;
-    height: 200px;
-    border-radius: 30px;
-    border: 2px solid rgba(150, 150, 150, 0.2);
-    background: white;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: none !important;
-}
-
-.media-item img {
-    width: auto;
-    height: auto;
-    max-width: 60%;
-    max-height: 80%;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    object-fit: contain;
-    box-shadow: none !important;
-    filter: none !important;
-}
-
-.media-item.loaded img {
-    opacity: 1;
-}
-
-/* For smaller devices */
-@media (max-width: 480px) {
-    .media-item {
-        width: 400px;
-        height: 170px;
+    /* Ensures styles only apply inside the container */
+    .client-cards-container .client-card {
+        background: #f8f8f8;
+        margin: 20px;
+        padding: 20px;
+        border-radius: 30px;
+        display: flex;
+        flex-direction: column;
+        /* Always stack vertically */
+        align-items: flex-start;
+        /* Align content to the left */
+        gap: 15px;
+        /* Space between logo and text */
     }
-    
-    .media-item img {
-        max-width: 70%;
-        max-height: 85%;
+
+    .client-cards-container .client-card img {
+        height: 40px;
+        margin-bottom: 5px;
+        /* Extra space below logo */
     }
-}
 
-/* Description styles */
-.description {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 16px;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-    color: white;
-    font-size: 14px;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
+    .client-card-text {
+        width: 100%;
+        /* Take full width */
+        padding: 20px;
+    }
 
-.media-item:hover .description {
-    opacity: 1;
-    transform: translateY(0);
-}
+    .client-cards-container .client-card-text p {
+        margin: 0;
+        font-size: 14px;
+        color: #777;
+    }
 
-/* Tap hint animation - only show on mobile */
-@media (hover: none) {
-    .tap-hint {
-        position: absolute;
-        top: 85%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+    .client-cards-container .client-card-text h4 {
+        margin: 0 0 5px 0;
+        /* Space below title */
+        font-size: 16px;
+        font-weight: 500;
+        color: #000;
+    }
+
+    /* No need for media query since we want same layout everywhere */
+    .media-section {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .media-title {
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
         text-align: center;
+    }
+
+    .media-gallery {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .media-item {
+        width: 600px;
+        height: 200px;
+        border-radius: 30px;
+        border: 2px solid rgba(150, 150, 150, 0.2);
+        background: white;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: none !important;
+    }
+
+    .media-item img {
+        width: auto;
+        height: auto;
+        max-width: 60%;
+        max-height: 80%;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        object-fit: contain;
+        box-shadow: none !important;
+        filter: none !important;
+    }
+
+    .media-item.loaded img {
         opacity: 1;
+    }
+
+    /* For smaller devices */
+    @media (max-width: 480px) {
+        .media-item {
+            width: 400px;
+            height: 170px;
+        }
+
+        .media-item img {
+            max-width: 70%;
+            max-height: 85%;
+        }
+    }
+
+    /* Description styles */
+    .description {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 16px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        color: white;
+        font-size: 14px;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .media-item:hover .description {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Tap hint animation - only show on mobile */
+    @media (hover: none) {
+        .tap-hint {
+            position: absolute;
+            top: 85%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .tap-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .tap-text {
+            font-size: 1rem;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    }
+
+    /* Explosion animation */
+    @keyframes explode {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    }
+
+    /* Particle effects */
+    .particle {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 10;
+        box-shadow: none !important;
+    }
+
+    /* Fullscreen viewer styles */
+    .media-viewer {
+        position: fixed;
+        top: 100%;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background: #fff;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 0.3s ease;
+        will-change: transform;
+        transform: translateY(0);
+        opacity: 0;
+    }
+
+    .media-viewer.active {
+        transform: translateY(-100%);
+        opacity: 1;
+    }
+
+    .viewer-header {
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        background: #fff;
         z-index: 2;
     }
-    
-    .tap-icon {
-        font-size: 2rem;
-        margin-bottom: 8px;
-        animation: float 2s ease-in-out infinite;
+
+    .back-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        color: #007AFF;
     }
-    
-    .tap-text {
-        font-size: 1rem;
-        color: #fff;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 6px 12px;
-        border-radius: 20px;
-        display: inline-block;
+
+    .back-button:hover {
+        background-color: rgba(0, 122, 255, 0.1);
     }
-    
-    @keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
+
+    .back-button svg {
+        width: 24px;
+        height: 24px;
     }
-}
-/* Explosion animation */
-@keyframes explode {
-    0% {
+
+    .viewer-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-left: 16px;
+        color: #000;
+    }
+
+    .viewer-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .viewer-media-container {
+        flex: 1;
+        display: flex;
+        align-items: left;
+        justify-content: left;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .viewer-media {
+        max-width: 100%;
+        max-height: 50vh;
+        object-fit: contain;
+        border-radius: 20%;
+        transform: scale(0.9);
+        opacity: 0;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
+            opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+    }
+
+    .media-viewer.active .viewer-media {
         transform: scale(1);
         opacity: 1;
     }
-    100% {
-        transform: scale(1.5);
-        opacity: 0;
-    }
-}
 
-/* Particle effects */
-.particle {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 10;
-    box-shadow: none !important;
-}
-/* Fullscreen viewer styles */
-.media-viewer {
-    position: fixed;
-    top: 100%;
-    left: 0;
-    right: 0;
-    height: 100%;
-    background: #fff;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
-                opacity 0.3s ease;
-    will-change: transform;
-    transform: translateY(0);
-    opacity: 0;
-}
-
-.media-viewer.active {
-    transform: translateY(-100%);
-    opacity: 1;
-}
-
-.viewer-header {
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    background: #fff;
-    z-index: 2;
-}
-
-.back-button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    color: #007AFF;
-}
-
-.back-button:hover {
-    background-color: rgba(0, 122, 255, 0.1);
-}
-
-.back-button svg {
-    width: 24px;
-    height: 24px;
-}
-
-.viewer-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-left: 16px;
-    color: #000;
-}
-
-.viewer-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}
-
-.viewer-media-container {
-    flex: 1;
-    display: flex;
-    align-items: left;
-    justify-content: left;
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-}
-
-.viewer-media {
-    max-width: 100%;
-    max-height: 50vh;
-    object-fit: contain;
-    border-radius: 20%;
-    transform: scale(0.9);
-    opacity: 0;
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, 
-                opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
-}
-
-.media-viewer.active .viewer-media {
-    transform: scale(1);
-    opacity: 1;
-}
-
-.viewer-info {
-    padding: 0 16px;
-}
-
-.info-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 2px;
-    color: #000;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.4s ease 0.3s, transform 0.4s ease 0.3s;
-}
-
-.info-description {
-    font-size: 16px;
-    line-height: 1.5;
-    color: #666;
-    margin-bottom: 20px;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.4s ease 0.4s, transform 0.4s ease 0.4s;
-}
-
-.media-viewer.active .info-title,
-.media-viewer.active .info-description {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.viewer-footer {
-    padding: 16px 24px;
-    display: flex;
-    justify-content: space-between;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    font-size: 14px;
-    color: #888;
-}
-
-/* Responsive adjustments */
-@media (min-width: 768px) {
-    .viewer-content {
-        flex-direction: row;
-        align-items: center;
-    }
-    
-    .viewer-media-container {
-        flex: 2;
-        margin-right: 32px;
-        margin-bottom: 0;
-    }
-    
     .viewer-info {
-        flex: 1;
+        padding: 0 16px;
     }
-}
 
-/* Animation for first-time users */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
+    .info-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 2px;
+        color: #000;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.4s ease 0.3s, transform 0.4s ease 0.3s;
+    }
 
-.first-time .media-item {
-    animation: pulse 2s infinite;
-}
+    .info-description {
+        font-size: 16px;
+        line-height: 1.5;
+        color: #666;
+        margin-bottom: 20px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.4s ease 0.4s, transform 0.4s ease 0.4s;
+    }
 
-.first-time .tap-hint {
-    opacity: 1;
-}
+    .media-viewer.active .info-title,
+    .media-viewer.active .info-description {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .viewer-footer {
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+        color: #888;
+    }
+
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+        .viewer-content {
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .viewer-media-container {
+            flex: 2;
+            margin-right: 32px;
+            margin-bottom: 0;
+        }
+
+        .viewer-info {
+            flex: 1;
+        }
+    }
+
+    /* Animation for first-time users */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .first-time .media-item {
+        animation: pulse 2s infinite;
+    }
+
+    .first-time .tap-hint {
+        opacity: 1;
+    }
