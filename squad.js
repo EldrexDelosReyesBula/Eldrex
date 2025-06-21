@@ -83,12 +83,16 @@
             `;
 
             backButton.addEventListener('click', () => {
-                document.body.style.opacity = '0';
-                document.body.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    window.history.back();
-                }, 300);
-            });
+    document.body.style.opacity = '0';
+    document.body.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.html'; 
+        }
+    }, 300);
+});
 
             const headerTitle = document.createElement('div');
             headerTitle.className = 'header-title';
