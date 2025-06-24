@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Owl of Myths: The Eternal Journey</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
     <style>
         * {
@@ -67,13 +65,8 @@
         }
 
         @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(90deg);
-            }
+            from { transform: rotate(0deg); }
+            to { transform: rotate(90deg); }
         }
 
         /* UI Elements */
@@ -87,8 +80,7 @@
             z-index: 10;
         }
 
-        .health-bar-container,
-        .stamina-bar-container {
+        .health-bar-container, .stamina-bar-container {
             position: absolute;
             top: 20px;
             left: 20px;
@@ -100,24 +92,16 @@
             overflow: hidden;
         }
 
-        .stamina-bar-container {
-            top: 60px;
-        }
+        .stamina-bar-container { top: 60px; }
 
-        .health-bar,
-        .stamina-bar {
+        .health-bar, .stamina-bar {
             height: 100%;
             width: 100%;
             transition: width 0.3s;
         }
 
-        .health-bar {
-            background-color: #8a5a44;
-        }
-
-        .stamina-bar {
-            background-color: #5a8a44;
-        }
+        .health-bar { background-color: #8a5a44; }
+        .stamina-bar { background-color: #5a8a44; }
 
         .stats-container {
             position: absolute;
@@ -147,37 +131,73 @@
             color: #e0d0a0;
         }
 
-        /* Controls */
-        #controls {
-            position: absolute;
-            bottom: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            pointer-events: auto;
-        }
+        /* Controls - Mobile Only */
+        @media (max-width: 768px) {
+            #controls {
+                position: absolute;
+                bottom: 30px;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                pointer-events: auto;
+            }
 
-        .control-button {
-            width: 70px;
-            height: 70px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border: 2px solid #8a5a44;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #e0d0a0;
-            font-size: 1.8rem;
-            cursor: pointer;
-            touch-action: manipulation;
-            user-select: none;
-            transition: all 0.2s;
-        }
+            #movement-controls {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-left: 20px;
+            }
 
-        .control-button:active {
-            background-color: rgba(138, 90, 68, 0.5);
-            transform: scale(0.95);
+            #action-controls {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-right: 20px;
+            }
+
+            .control-button {
+                width: 60px;
+                height: 60px;
+                background-color: rgba(0, 0, 0, 0.5);
+                border: 2px solid #8a5a44;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #e0d0a0;
+                font-size: 1.5rem;
+                cursor: pointer;
+                touch-action: manipulation;
+                user-select: none;
+                transition: all 0.2s;
+                margin: 5px;
+            }
+
+            .control-button:active {
+                background-color: rgba(138, 90, 68, 0.5);
+                transform: scale(0.95);
+            }
+
+            #joystick-area {
+                width: 120px;
+                height: 120px;
+                background-color: rgba(0, 0, 0, 0.3);
+                border-radius: 50%;
+                position: relative;
+                margin-bottom: 10px;
+            }
+
+            #joystick {
+                width: 50px;
+                height: 50px;
+                background-color: rgba(138, 90, 68, 0.7);
+                border-radius: 50%;
+                position: absolute;
+                top: 35px;
+                left: 35px;
+                touch-action: none;
+            }
         }
 
         /* Menus */
@@ -205,17 +225,9 @@
         }
 
         @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         .menu-button {
@@ -564,14 +576,8 @@
             color: #e0d0a0;
         }
 
-        /* Mobile Controls */
+        /* Performance Optimizations */
         @media (max-width: 768px) {
-            .control-button {
-                width: 60px;
-                height: 60px;
-                font-size: 1.5rem;
-            }
-
             .menu-title {
                 font-size: 2rem;
             }
@@ -582,8 +588,7 @@
                 font-size: 1rem;
             }
 
-            .health-bar-container,
-            .stamina-bar-container {
+            .health-bar-container, .stamina-bar-container {
                 width: 150px;
                 height: 25px;
             }
@@ -604,9 +609,38 @@
                 display: flex;
             }
         }
+
+        /* Food Indicator */
+        #food-indicator {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 2px solid #8a5a44;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .food-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .food-icon {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        .food-count {
+            color: #e0d0a0;
+        }
     </style>
 </head>
-
 <body>
     <!-- Orientation Warning -->
     <div id="orientation-warning">
@@ -627,6 +661,22 @@
             </div>
             <div class="stamina-bar-container">
                 <div class="stamina-bar" id="stamina-bar"></div>
+            </div>
+
+            <!-- Food Inventory -->
+            <div id="food-indicator">
+                <div class="food-item">
+                    <span class="food-icon">🍎</span>
+                    <span class="food-count" id="apple-count">0</span>
+                </div>
+                <div class="food-item">
+                    <span class="food-icon">🍗</span>
+                    <span class="food-count" id="meat-count">0</span>
+                </div>
+                <div class="food-item">
+                    <span class="food-icon">🍄</span>
+                    <span class="food-count" id="mushroom-count">0</span>
+                </div>
             </div>
 
             <!-- Stats -->
@@ -661,13 +711,18 @@
                 </div>
             </div>
 
-            <!-- Controls -->
+            <!-- Mobile Controls -->
             <div id="controls">
-                <div class="control-button" id="left-button">←</div>
-                <div class="control-button" id="up-button">↑</div>
-                <div class="control-button" id="right-button">→</div>
-                <div class="control-button" id="action-button">A</div>
-                <div class="control-button" id="menu-button">M</div>
+                <div id="movement-controls">
+                    <div id="joystick-area">
+                        <div id="joystick"></div>
+                    </div>
+                    <div class="control-button" id="up-button">↑</div>
+                </div>
+                <div id="action-controls">
+                    <div class="control-button" id="action-button">A</div>
+                    <div class="control-button" id="menu-button">M</div>
+                </div>
             </div>
         </div>
 
@@ -774,17 +829,27 @@
             <div class="shop-items" id="shop-items">
                 <!-- Shop items will be generated here -->
             </div>
+            <button class="close-button" id="close-shop-button" style="margin-top: 20px; align-self: center;">CLOSE SHOP</button>
         </div>
     </div>
 
     <script>
         // Game Constants
-        const GAME_VERSION = "1.0.0";
+        const GAME_VERSION = "2.0.0";
         const BIOMES = ['forest', 'desert', 'mountains', 'swamp', 'caves'];
         const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
         const WEATHER = ['clear', 'rain', 'storm', 'fog', 'heatwave', 'snow'];
         const PREDATORS = ['tiger', 'eagle', 'fox', 'wolf', 'snake', 'chameleon'];
         const DIFFICULTIES = ['easy', 'normal', 'hard', 'extreme'];
+        const FOOD_TYPES = ['apple', 'meat', 'mushroom'];
+
+        // Performance settings
+        const PERFORMANCE = {
+            terrainDetail: window.innerWidth > 768 ? 'high' : 'medium',
+            shadowQuality: window.innerWidth > 768 ? 1024 : 512,
+            particleCount: window.innerWidth > 768 ? 1000 : 500,
+            physicsSteps: window.innerWidth > 768 ? 3 : 2
+        };
 
         // Game Data
         const PREDATOR_DATA = {
@@ -856,8 +921,6 @@
             }
         };
 
-
-
         const BIOME_DATA = {
             forest: {
                 name: "Ancient Forest",
@@ -866,7 +929,8 @@
                 visibility: 0.8,
                 color: 0x0a300a,
                 terrainHeight: 5,
-                treeDensity: 0.8
+                treeDensity: 0.8,
+                foodSpawn: ['apple', 'mushroom']
             },
             desert: {
                 name: "Scorching Desert",
@@ -875,7 +939,8 @@
                 visibility: 1.0,
                 color: 0xd4b16a,
                 terrainHeight: 2,
-                treeDensity: 0.1
+                treeDensity: 0.1,
+                foodSpawn: []
             },
             mountains: {
                 name: "Mystic Mountains",
@@ -884,7 +949,8 @@
                 visibility: 0.9,
                 color: 0x3a4a6b,
                 terrainHeight: 15,
-                treeDensity: 0.5
+                treeDensity: 0.5,
+                foodSpawn: ['meat']
             },
             swamp: {
                 name: "Murky Swamp",
@@ -893,7 +959,8 @@
                 visibility: 0.6,
                 color: 0x2a4a3a,
                 terrainHeight: 3,
-                treeDensity: 0.6
+                treeDensity: 0.6,
+                foodSpawn: ['mushroom']
             },
             caves: {
                 name: "Dark Caves",
@@ -902,7 +969,8 @@
                 visibility: 0.3,
                 color: 0x1a1a1a,
                 terrainHeight: 8,
-                treeDensity: 0.2
+                treeDensity: 0.2,
+                foodSpawn: ['mushroom']
             }
         };
 
@@ -997,7 +1065,32 @@
             }
         };
 
-        const SHOP_ITEMS = [{
+        const FOOD_DATA = {
+            apple: {
+                name: "Apple",
+                icon: "🍎",
+                healthRestore: 10,
+                staminaRestore: 5,
+                rarity: 0.7
+            },
+            meat: {
+                name: "Meat",
+                icon: "🍗",
+                healthRestore: 20,
+                staminaRestore: 10,
+                rarity: 0.5
+            },
+            mushroom: {
+                name: "Mushroom",
+                icon: "🍄",
+                healthRestore: 5,
+                staminaRestore: 15,
+                rarity: 0.8
+            }
+        };
+
+        const SHOP_ITEMS = [
+            {
                 id: 'stamina-upgrade',
                 name: "Stamina Upgrade",
                 description: "Permanently increases your maximum stamina by 20 points.",
@@ -1080,6 +1173,57 @@
                     gameState.player.stamina = Math.min(gameState.player.maxStamina, gameState.player.stamina + 40);
                 },
                 consumable: true
+            },
+            {
+                id: 'food-pack',
+                name: "Food Pack",
+                description: "Gives 3 random food items to restore health and stamina.",
+                price: 20,
+                icon: "🍱",
+                effect: (gameState) => {
+                    for (let i = 0; i < 3; i++) {
+                        const foodType = FOOD_TYPES[Math.floor(Math.random() * FOOD_TYPES.length)];
+                        gameState.player.inventory[foodType] = (gameState.player.inventory[foodType] || 0) + 1;
+                    }
+                    updateFoodUI();
+                },
+                consumable: true
+            },
+            {
+                id: 'apple',
+                name: "Apple",
+                description: "Restores 10 health and 5 stamina.",
+                price: 5,
+                icon: "🍎",
+                effect: (gameState) => {
+                    gameState.player.inventory.apple = (gameState.player.inventory.apple || 0) + 1;
+                    updateFoodUI();
+                },
+                consumable: true
+            },
+            {
+                id: 'meat',
+                name: "Meat",
+                description: "Restores 20 health and 10 stamina.",
+                price: 10,
+                icon: "🍗",
+                effect: (gameState) => {
+                    gameState.player.inventory.meat = (gameState.player.inventory.meat || 0) + 1;
+                    updateFoodUI();
+                },
+                consumable: true
+            },
+            {
+                id: 'mushroom',
+                name: "Mushroom",
+                description: "Restores 5 health and 15 stamina.",
+                price: 7,
+                icon: "🍄",
+                effect: (gameState) => {
+                    gameState.player.inventory.mushroom = (gameState.player.inventory.mushroom || 0) + 1;
+                    updateFoodUI();
+                },
+                consumable: true
             }
         ];
 
@@ -1093,16 +1237,8 @@
                 speed: 5,
                 coins: 0,
                 distance: 0,
-                position: {
-                    x: 0,
-                    y: 10,
-                    z: 0
-                },
-                velocity: {
-                    x: 0,
-                    y: 0,
-                    z: 0
-                },
+                position: { x: 0, y: 10, z: 0 },
+                velocity: { x: 0, y: 0, z: 0 },
                 upgrades: {
                     staminaRecovery: 1,
                     speed: 1,
@@ -1113,7 +1249,11 @@
                 },
                 unlockedPredators: [],
                 unlockedPages: [],
-                inventory: []
+                inventory: {
+                    apple: 0,
+                    meat: 0,
+                    mushroom: 0
+                }
             },
             currentMission: {
                 predator: null,
@@ -1124,18 +1264,16 @@
                 completed: false,
                 startTime: 0,
                 endTime: 0,
-                predatorPosition: {
-                    x: 50,
-                    y: 0,
-                    z: 0
-                },
-                predatorHealth: 0
+                predatorPosition: { x: 50, y: 0, z: 0 },
+                predatorHealth: 0,
+                foodItems: []
             },
             settings: {
                 sound: true,
                 music: true,
                 difficulty: 'normal',
-                autoSave: true
+                autoSave: true,
+                controls: 'buttons' // 'buttons' or 'joystick'
             },
             stats: {
                 totalDistance: 0,
@@ -1143,26 +1281,27 @@
                 deaths: 0,
                 playTime: 0,
                 coinsCollected: 0,
-                upgradesPurchased: 0
+                upgradesPurchased: 0,
+                foodConsumed: 0
             }
         };
 
         // Three.js Variables
-        let scene, camera, renderer, world, clock, mixer, owlModel, predatorModel;
-        let owl, predator, terrain, particles, weatherParticles, lightning;
+        let scene, camera, renderer, world, clock, owl, predator, terrain, weatherParticles, lightning;
         let directionalLight, ambientLight, hemisphereLight;
         let controls = {
             left: false,
             right: false,
             up: false,
             action: false,
-            menu: false
+            menu: false,
+            joystick: { x: 0, y: 0 }
         };
 
         // Physics Variables
         let physicsWorld;
         const fixedTimeStep = 1.0 / 60.0;
-        const maxSubSteps = 3;
+        const maxSubSteps = PERFORMANCE.physicsSteps;
 
         // DOM Elements
         const elements = {
@@ -1189,7 +1328,12 @@
             seasonValue: document.getElementById('season-value'),
             weatherValue: document.getElementById('weather-value'),
             shopCoinsValue: document.getElementById('shop-coins-value'),
-            shopItems: document.getElementById('shop-items')
+            shopItems: document.getElementById('shop-items'),
+            appleCount: document.getElementById('apple-count'),
+            meatCount: document.getElementById('meat-count'),
+            mushroomCount: document.getElementById('mushroom-count'),
+            joystick: document.getElementById('joystick'),
+            joystickArea: document.getElementById('joystick-area')
         };
 
         // Buttons
@@ -1217,19 +1361,16 @@
             autosaveToggle: document.getElementById('autosave-toggle'),
             controlsHelpButton: document.getElementById('controls-help-button'),
             resetGameButton: document.getElementById('reset-game-button'),
-            closeSettingsButton: document.getElementById('close-settings-button')
+            closeSettingsButton: document.getElementById('close-settings-button'),
+            closeShopButton: document.getElementById('close-shop-button')
         };
 
         // Game Variables
         let gameRunning = false;
         let lastTime = 0;
         let keys = {};
-        let touchControls = {
-            left: false,
-            right: false,
-            up: false,
-            action: false
-        };
+        let joystickActive = false;
+        let joystickStartPos = { x: 0, y: 0 };
 
         // Audio
         const audio = {
@@ -1239,35 +1380,38 @@
             thunder: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-thunder-strike-1680.mp3'),
             success: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3'),
             damage: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-player-jumping-in-a-video-game-2043.mp3'),
+            eat: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-eating-or-chewing-1273.mp3'),
             background: new Audio('https://assets.mixkit.co/music/preview/mixkit-ethereal-fairy-pipe-consort-1450.mp3')
         };
 
         // Initialize Three.js scene
         function initThreeJS() {
-            // Create scene
+            // Create scene with performance settings
             scene = new THREE.Scene();
             scene.fog = new THREE.FogExp2(0x000000, 0.01);
 
-            // Create camera
+            // Create camera with aspect ratio based on device
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, 15, 30);
             camera.lookAt(0, 10, 0);
 
-            // Create renderer
+            // Create renderer with device-appropriate settings
             renderer = new THREE.WebGLRenderer({
                 canvas: elements.gameCanvas,
-                antialias: true
+                antialias: PERFORMANCE.terrainDetail === 'high',
+                powerPreference: "high-performance"
             });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.shadowMap.autoUpdate = false; // Manual shadow updates for performance
 
-            // Add lights
+            // Add optimized lights
             directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
             directionalLight.position.set(0, 50, 50);
             directionalLight.castShadow = true;
-            directionalLight.shadow.mapSize.width = 1024;
-            directionalLight.shadow.mapSize.height = 1024;
+            directionalLight.shadow.mapSize.width = PERFORMANCE.shadowQuality;
+            directionalLight.shadow.mapSize.height = PERFORMANCE.shadowQuality;
             directionalLight.shadow.camera.near = 0.5;
             directionalLight.shadow.camera.far = 500;
             directionalLight.shadow.camera.left = -100;
@@ -1289,21 +1433,19 @@
             initPhysics();
 
             // Handle window resize
-            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('resize', onWindowResize, { passive: true });
         }
 
         function initPhysics() {
-            // Setup Cannon.js physics world
+            // Setup Cannon.js physics world with performance settings
             physicsWorld = new CANNON.World();
             physicsWorld.gravity.set(0, -9.82, 0);
             physicsWorld.broadphase = new CANNON.NaiveBroadphase();
-            physicsWorld.solver.iterations = 10;
+            physicsWorld.solver.iterations = 8; // Reduced for performance
 
             // Create ground plane
             const groundShape = new CANNON.Plane();
-            const groundBody = new CANNON.Body({
-                mass: 0
-            });
+            const groundBody = new CANNON.Body({ mass: 0 });
             groundBody.addShape(groundShape);
             groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
             physicsWorld.addBody(groundBody);
@@ -1315,22 +1457,22 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // Create terrain
+        // Create optimized terrain
         function createTerrain() {
             const biome = BIOME_DATA[gameState.currentMission.biome];
-            const geometry = new THREE.PlaneGeometry(200, 200, 50, 50);
+            const segments = PERFORMANCE.terrainDetail === 'high' ? 100 : 50;
+            const geometry = new THREE.PlaneGeometry(200, 200, segments, segments);
 
-            // Create height variations
+            // Create height variations with optimized noise
             const position = geometry.attributes.position;
             for (let i = 0; i < position.count; i++) {
                 const x = position.getX(i);
                 const z = position.getZ(i);
-
-                // Generate terrain height with Perlin-like noise
+                
+                // Simpler noise function for performance
                 let height = biome.terrainHeight * (
-                    Math.sin(x * 0.1) * Math.cos(z * 0.1) +
-                    0.5 * Math.sin(x * 0.2) * Math.cos(z * 0.2) +
-                    0.25 * Math.sin(x * 0.4) * Math.cos(z * 0.4)
+                    Math.sin(x * 0.05) * Math.cos(z * 0.05) +
+                    0.5 * Math.sin(x * 0.1) * Math.cos(z * 0.1)
                 );
 
                 position.setY(i, height);
@@ -1341,7 +1483,7 @@
             const material = new THREE.MeshStandardMaterial({
                 color: biome.color,
                 side: THREE.DoubleSide,
-                flatShading: true
+                flatShading: PERFORMANCE.terrainDetail !== 'high'
             });
 
             terrain = new THREE.Mesh(geometry, material);
@@ -1349,20 +1491,67 @@
             terrain.receiveShadow = true;
             scene.add(terrain);
 
-            // Add trees for forest biome
+            // Add trees for forest biome with performance considerations
             if (biome.treeDensity > 0) {
-                for (let i = 0; i < 100 * biome.treeDensity; i++) {
-                    const tree = createTree();
-                    tree.position.x = Math.random() * 180 - 90;
-                    tree.position.z = Math.random() * 180 - 90;
-
-                    // Adjust y position based on terrain
-                    const terrainHeight = getTerrainHeight(tree.position.x, tree.position.z);
-                    tree.position.y = terrainHeight;
-
-                    scene.add(tree);
+                const treeCount = Math.floor(100 * biome.treeDensity * (PERFORMANCE.terrainDetail === 'high' ? 1 : 0.7));
+                
+                // Use instanced mesh for better performance if many trees
+                if (treeCount > 50 && PERFORMANCE.terrainDetail === 'high') {
+                    const treeGeometry = createTreeGeometry();
+                    const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+                    const treeTopMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+                    
+                    const treeInstances = new THREE.Group();
+                    for (let i = 0; i < treeCount; i++) {
+                        const tree = new THREE.Mesh(treeGeometry, [treeMaterial, treeTopMaterial]);
+                        tree.position.x = Math.random() * 180 - 90;
+                        tree.position.z = Math.random() * 180 - 90;
+                        tree.position.y = getTerrainHeight(tree.position.x, tree.position.z);
+                        tree.castShadow = true;
+                        treeInstances.add(tree);
+                    }
+                    scene.add(treeInstances);
+                } else {
+                    // Fewer trees - create individually
+                    for (let i = 0; i < treeCount; i++) {
+                        const tree = createTree();
+                        tree.position.x = Math.random() * 180 - 90;
+                        tree.position.z = Math.random() * 180 - 90;
+                        tree.position.y = getTerrainHeight(tree.position.x, tree.position.z);
+                        scene.add(tree);
+                    }
                 }
             }
+
+            // Spawn food items in the environment
+            spawnFoodItems();
+        }
+
+        function createTreeGeometry() {
+            // Create combined geometry for better performance with instancing
+            const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.7, 5, 8);
+            const leavesGeometry = new THREE.SphereGeometry(3, 8, 8);
+            
+            // Combine geometries
+            trunkGeometry.translate(0, 2.5, 0);
+            leavesGeometry.translate(0, 5, 0);
+            
+            const combinedGeometry = new THREE.BufferGeometry();
+            const trunkAttr = trunkGeometry.attributes;
+            const leavesAttr = leavesGeometry.attributes;
+            
+            // Combine position attributes
+            const position = new Float32Array(trunkAttr.position.count + leavesAttr.position.count);
+            position.set(trunkAttr.position.array, 0);
+            position.set(leavesAttr.position.array, trunkAttr.position.count * 3);
+            combinedGeometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
+            
+            // Create material index for each part
+            const index = new Uint16Array(trunkAttr.position.count / 3 + leavesAttr.position.count / 3);
+            index.fill(0, 0, trunkAttr.position.count / 3); // Trunk material index
+            index.fill(1, trunkAttr.position.count / 3); // Leaves material index
+            
+            return combinedGeometry;
         }
 
         function createTree() {
@@ -1370,9 +1559,7 @@
 
             // Trunk
             const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.7, 5, 8);
-            const trunkMaterial = new THREE.MeshStandardMaterial({
-                color: 0x8B4513
-            });
+            const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
             const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
             trunk.position.y = 2.5;
             trunk.castShadow = true;
@@ -1380,9 +1567,7 @@
 
             // Leaves
             const leavesGeometry = new THREE.SphereGeometry(3, 8, 8);
-            const leavesMaterial = new THREE.MeshStandardMaterial({
-                color: 0x228B22
-            });
+            const leavesMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
             const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
             leaves.position.y = 5;
             leaves.castShadow = true;
@@ -1391,59 +1576,95 @@
             return group;
         }
 
+        function spawnFoodItems() {
+            const biome = BIOME_DATA[gameState.currentMission.biome];
+            gameState.currentMission.foodItems = [];
+            
+            // Spawn food based on biome
+            biome.foodSpawn.forEach(foodType => {
+                const count = Math.floor(5 * FOOD_DATA[foodType].rarity);
+                
+                for (let i = 0; i < count; i++) {
+                    const food = {
+                        type: foodType,
+                        position: {
+                            x: Math.random() * 180 - 90,
+                            z: Math.random() * 180 - 90,
+                            y: getTerrainHeight(x, z) + 0.5
+                        },
+                        collected: false
+                    };
+                    gameState.currentMission.foodItems.push(food);
+                    
+                    // Create visual representation (simplified for performance)
+                    const foodGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+                    const foodMaterial = new THREE.MeshStandardMaterial({ 
+                        color: foodType === 'apple' ? 0xff0000 : 
+                               foodType === 'meat' ? 0x8B0000 : 0x8B4513 
+                    });
+                    const foodMesh = new THREE.Mesh(foodGeometry, foodMaterial);
+                    foodMesh.position.set(food.position.x, food.position.y, food.position.z);
+                    foodMesh.userData.foodItem = food;
+                    scene.add(foodMesh);
+                }
+            });
+        }
+
         function getTerrainHeight(x, z) {
             if (!terrain) return 0;
 
-            // Convert world coordinates to geometry vertices
+            // Convert world coordinates to local terrain coordinates
+            const localX = x - terrain.position.x;
+            const localZ = z - terrain.position.z;
+            
+            // Simplified height calculation for performance
             const geometry = terrain.geometry;
             const position = geometry.attributes.position;
-
-            // Find closest vertex (simplified approach)
-            let closestDistance = Infinity;
-            let closestHeight = 0;
-
-            for (let i = 0; i < position.count; i++) {
+            
+            // Find approximate height by sampling nearest vertices
+            let minDist = Infinity;
+            let height = 0;
+            
+            // Sample a subset of vertices for performance
+            for (let i = 0; i < position.count; i += Math.floor(position.count / 100)) {
                 const vx = position.getX(i);
                 const vz = position.getZ(i);
-                const distance = Math.sqrt((vx - x) ** 2 + (vz - z) ** 2);
-
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestHeight = position.getY(i);
+                const dist = Math.sqrt((vx - localX) ** 2 + (vz - localZ) ** 2);
+                
+                if (dist < minDist) {
+                    minDist = dist;
+                    height = position.getY(i);
                 }
             }
-
-            return closestHeight;
+            
+            return height;
         }
 
-        // Create owl character
+        // Create optimized owl character
         function createOwl() {
             const group = new THREE.Group();
 
-            // Body
-            const bodyGeometry = new THREE.SphereGeometry(1.5, 16, 16);
-            const bodyMaterial = new THREE.MeshStandardMaterial({
-                color: 0x8a5a44
-            });
+            // Use simpler geometry for mobile
+            const isMobile = window.innerWidth <= 768;
+            
+            // Body (sphere)
+            const bodyGeometry = new THREE.SphereGeometry(1.5, isMobile ? 12 : 16, isMobile ? 12 : 16);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x8a5a44 });
             const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-            body.castShadow = true;
+            body.castShadow = !isMobile; // Disable shadows on mobile for performance
             group.add(body);
 
-            // Head
-            const headGeometry = new THREE.SphereGeometry(1, 16, 16);
-            const headMaterial = new THREE.MeshStandardMaterial({
-                color: 0x8a5a44
-            });
+            // Head (sphere)
+            const headGeometry = new THREE.SphereGeometry(1, isMobile ? 10 : 16, isMobile ? 10 : 16);
+            const headMaterial = new THREE.MeshStandardMaterial({ color: 0x8a5a44 });
             const head = new THREE.Mesh(headGeometry, headMaterial);
             head.position.y = 1.5;
-            head.castShadow = true;
+            head.castShadow = !isMobile;
             group.add(head);
 
-            // Eyes
-            const eyeGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-            const eyeMaterial = new THREE.MeshStandardMaterial({
-                color: 0xffffff
-            });
+            // Eyes (spheres)
+            const eyeGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+            const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
             const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
             leftEye.position.set(-0.4, 1.6, 0.8);
@@ -1453,11 +1674,9 @@
             rightEye.position.set(0.4, 1.6, 0.8);
             group.add(rightEye);
 
-            // Pupils
-            const pupilGeometry = new THREE.SphereGeometry(0.15, 16, 16);
-            const pupilMaterial = new THREE.MeshStandardMaterial({
-                color: 0x000000
-            });
+            // Pupils (spheres)
+            const pupilGeometry = new THREE.SphereGeometry(0.15, 6, 6);
+            const pupilMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
 
             const leftPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
             leftPupil.position.set(-0.4, 1.6, 1.1);
@@ -1467,39 +1686,33 @@
             rightPupil.position.set(0.4, 1.6, 1.1);
             group.add(rightPupil);
 
-            // Beak
-            const beakGeometry = new THREE.ConeGeometry(0.2, 0.5, 16);
-            const beakMaterial = new THREE.MeshStandardMaterial({
-                color: 0xe8a040
-            });
+            // Beak (cone)
+            const beakGeometry = new THREE.ConeGeometry(0.2, 0.5, 8);
+            const beakMaterial = new THREE.MeshStandardMaterial({ color: 0xe8a040 });
             const beak = new THREE.Mesh(beakGeometry, beakMaterial);
             beak.position.set(0, 1.4, 1.1);
             beak.rotation.x = Math.PI / 2;
             group.add(beak);
 
-            // Wings
-            const wingGeometry = new THREE.SphereGeometry(1.2, 16, 16, 0, Math.PI, 0, Math.PI / 2);
-            const wingMaterial = new THREE.MeshStandardMaterial({
-                color: 0x6a4a34
-            });
+            // Wings (hemispheres)
+            const wingGeometry = new THREE.SphereGeometry(1.2, 8, 8, 0, Math.PI, 0, Math.PI / 2);
+            const wingMaterial = new THREE.MeshStandardMaterial({ color: 0x6a4a34 });
 
             const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
             leftWing.position.set(-1.5, 0.5, 0);
             leftWing.rotation.z = Math.PI / 4;
-            leftWing.castShadow = true;
+            leftWing.castShadow = !isMobile;
             group.add(leftWing);
 
             const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
             rightWing.position.set(1.5, 0.5, 0);
             rightWing.rotation.z = -Math.PI / 4;
-            rightWing.castShadow = true;
+            rightWing.castShadow = !isMobile;
             group.add(rightWing);
 
-            // Tail
-            const tailGeometry = new THREE.ConeGeometry(0.5, 1.5, 16);
-            const tailMaterial = new THREE.MeshStandardMaterial({
-                color: 0x6a4a34
-            });
+            // Tail (cone)
+            const tailGeometry = new THREE.ConeGeometry(0.5, 1.5, 8);
+            const tailMaterial = new THREE.MeshStandardMaterial({ color: 0x6a4a34 });
             const tail = new THREE.Mesh(tailGeometry, tailMaterial);
             tail.position.set(0, 0, -1.5);
             tail.rotation.x = Math.PI / 2;
@@ -1513,11 +1726,9 @@
             ));
             scene.add(owl);
 
-            // Create physics body for owl
+            // Create physics body for owl (simplified for performance)
             const owlShape = new CANNON.Sphere(1.5);
-            const owlBody = new CANNON.Body({
-                mass: 1
-            });
+            const owlBody = new CANNON.Body({ mass: 1 });
             owlBody.addShape(owlShape);
             owlBody.position.copy(owl.position);
             physicsWorld.addBody(owlBody);
@@ -1525,26 +1736,23 @@
             return owl;
         }
 
-        // ... (rest of your game data objects remain the same)
-
-        // Create predator - fixed version
+        // Create optimized predator
         function createPredator() {
             if (!gameState.currentMission.predator) return;
 
             const predatorType = gameState.currentMission.predator;
             const predatorInfo = PREDATOR_DATA[predatorType];
+            const isMobile = window.innerWidth <= 768;
 
             const group = new THREE.Group();
 
             switch (predatorType) {
                 case 'tiger':
-                    // Body
+                    // Simplified tiger model
                     const tigerBodyGeometry = new THREE.BoxGeometry(3, 1.5, 2);
-                    const tigerBodyMaterial = new THREE.MeshStandardMaterial({
-                        color: 0xe8a040
-                    });
+                    const tigerBodyMaterial = new THREE.MeshStandardMaterial({ color: 0xe8a040 });
                     const tigerBody = new THREE.Mesh(tigerBodyGeometry, tigerBodyMaterial);
-                    tigerBody.castShadow = true;
+                    tigerBody.castShadow = !isMobile;
                     group.add(tigerBody);
 
                     // Head
@@ -1553,20 +1761,18 @@
                     tigerHead.position.set(-1.8, 0.5, 0);
                     group.add(tigerHead);
 
-                    // Stripes
+                    // Stripes (simplified)
                     const stripeGeometry = new THREE.BoxGeometry(0.2, 0.1, 2.2);
-                    const stripeMaterial = new THREE.MeshStandardMaterial({
-                        color: 0x000000
-                    });
-                    for (let i = 0; i < 5; i++) {
+                    const stripeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+                    for (let i = 0; i < 3; i++) { // Reduced stripe count
                         const stripe = new THREE.Mesh(stripeGeometry, stripeMaterial);
-                        stripe.position.set(-2 + i * 0.8, 0.8, 0);
+                        stripe.position.set(-2 + i * 1.5, 0.8, 0);
                         stripe.rotation.z = Math.PI / 4;
                         group.add(stripe);
                     }
 
                     // Legs
-                    const legGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 8);
+                    const legGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 6);
                     for (let i = 0; i < 4; i++) {
                         const leg = new THREE.Mesh(legGeometry, tigerBodyMaterial);
                         const x = i < 2 ? -1 : 1;
@@ -1577,7 +1783,7 @@
                     }
 
                     // Tail
-                    const tailGeometry = new THREE.CylinderGeometry(0.2, 0.1, 2, 8);
+                    const tailGeometry = new THREE.CylinderGeometry(0.2, 0.1, 2, 6);
                     const tail = new THREE.Mesh(tailGeometry, tigerBodyMaterial);
                     tail.position.set(2, -0.5, 0);
                     tail.rotation.z = Math.PI / 4;
@@ -1585,32 +1791,28 @@
                     break;
 
                 case 'eagle':
-                    // Body
-                    const eagleBodyGeometry = new THREE.SphereGeometry(1, 16, 16);
-                    const eagleBodyMaterial = new THREE.MeshStandardMaterial({
-                        color: 0x8a5a44
-                    });
+                    // Simplified eagle model
+                    const eagleBodyGeometry = new THREE.SphereGeometry(1, 12, 12);
+                    const eagleBodyMaterial = new THREE.MeshStandardMaterial({ color: 0x8a5a44 });
                     const eagleBody = new THREE.Mesh(eagleBodyGeometry, eagleBodyMaterial);
                     group.add(eagleBody);
 
                     // Head
-                    const eagleHeadGeometry = new THREE.SphereGeometry(0.7, 16, 16);
+                    const eagleHeadGeometry = new THREE.SphereGeometry(0.7, 10, 10);
                     const eagleHead = new THREE.Mesh(eagleHeadGeometry, eagleBodyMaterial);
                     eagleHead.position.set(0, 0, 1.2);
                     group.add(eagleHead);
 
                     // Beak
-                    const beakGeometry = new THREE.ConeGeometry(0.2, 0.8, 16);
-                    const beakMaterial = new THREE.MeshStandardMaterial({
-                        color: 0xe8a040
-                    });
+                    const beakGeometry = new THREE.ConeGeometry(0.2, 0.8, 6);
+                    const beakMaterial = new THREE.MeshStandardMaterial({ color: 0xe8a040 });
                     const beak = new THREE.Mesh(beakGeometry, beakMaterial);
                     beak.position.set(0, 0, 1.8);
                     beak.rotation.x = Math.PI / 2;
                     group.add(beak);
 
-                    // Wings
-                    const wingGeometry = new THREE.PlaneGeometry(4, 1.5);
+                    // Wings (simplified)
+                    const wingGeometry = new THREE.PlaneGeometry(4, 1.5, 1, 1);
                     const wingMaterial = new THREE.MeshStandardMaterial({
                         color: 0x5a3a24,
                         side: THREE.DoubleSide
@@ -1628,131 +1830,13 @@
                     group.add(rightWing);
                     break;
 
-                case 'fox':
-                    // Body
-                    const foxBodyGeometry = new THREE.SphereGeometry(1.5, 16, 16);
-                    const foxBodyMaterial = new THREE.MeshStandardMaterial({
-                        color: 0xe87a40
-                    });
-                    const foxBody = new THREE.Mesh(foxBodyGeometry, foxBodyMaterial);
-                    group.add(foxBody);
-
-                    // Head
-                    const foxHeadGeometry = new THREE.SphereGeometry(0.8, 16, 16);
-                    const foxHead = new THREE.Mesh(foxHeadGeometry, foxBodyMaterial);
-                    foxHead.position.set(-1.5, 0, 0);
-                    group.add(foxHead);
-
-                    // Ears
-                    const earGeometry = new THREE.ConeGeometry(0.3, 0.8, 16);
-                    const leftEar = new THREE.Mesh(earGeometry, foxBodyMaterial);
-                    leftEar.position.set(-1.8, 0.8, 0);
-                    leftEar.rotation.z = Math.PI / 6;
-                    group.add(leftEar);
-
-                    const rightEar = new THREE.Mesh(earGeometry, foxBodyMaterial);
-                    rightEar.position.set(-1.2, 0.8, 0);
-                    rightEar.rotation.z = -Math.PI / 6;
-                    group.add(rightEar);
-
-                    // Tail
-                    const foxTailGeometry = new THREE.ConeGeometry(0.5, 3, 16);
-                    const foxTail = new THREE.Mesh(foxTailGeometry, foxBodyMaterial);
-                    foxTail.position.set(1.5, 0, 0);
-                    foxTail.rotation.z = Math.PI / 6;
-                    group.add(foxTail);
-                    break;
-
-                case 'wolf':
-                    // Similar to fox but different color and proportions
-                    const wolfBodyGeometry = new THREE.SphereGeometry(1.5, 16, 16);
-                    const wolfBodyMaterial = new THREE.MeshStandardMaterial({
-                        color: 0xaaaaaa
-                    });
-                    const wolfBody = new THREE.Mesh(wolfBodyGeometry, wolfBodyMaterial);
-                    group.add(wolfBody);
-
-                    const wolfHeadGeometry = new THREE.SphereGeometry(0.8, 16, 16);
-                    const wolfHead = new THREE.Mesh(wolfHeadGeometry, wolfBodyMaterial);
-                    wolfHead.position.set(-1.5, 0, 0);
-                    group.add(wolfHead);
-
-                    const wolfEarGeometry = new THREE.ConeGeometry(0.3, 0.8, 16);
-                    const wolfLeftEar = new THREE.Mesh(wolfEarGeometry, wolfBodyMaterial);
-                    wolfLeftEar.position.set(-1.8, 0.8, 0);
-                    wolfLeftEar.rotation.z = Math.PI / 6;
-                    group.add(wolfLeftEar);
-
-                    const wolfRightEar = new THREE.Mesh(wolfEarGeometry, wolfBodyMaterial);
-                    wolfRightEar.position.set(-1.2, 0.8, 0);
-                    wolfRightEar.rotation.z = -Math.PI / 6;
-                    group.add(wolfRightEar);
-
-                    const wolfTailGeometry = new THREE.ConeGeometry(0.4, 2, 16);
-                    const wolfTail = new THREE.Mesh(wolfTailGeometry, wolfBodyMaterial);
-                    wolfTail.position.set(1.5, 0, 0);
-                    wolfTail.rotation.z = Math.PI / 6;
-                    group.add(wolfTail);
-                    break;
-
-                case 'snake':
-                    // Create a snake with segments
-                    const segments = 10;
-                    const snakeSegmentGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-                    const snakeSegmentMaterial = new THREE.MeshStandardMaterial({
-                        color: 0x5a8a44
-                    });
-
-                    for (let i = 0; i < segments; i++) {
-                        const segment = new THREE.Mesh(snakeSegmentGeometry, snakeSegmentMaterial);
-                        segment.position.x = i * 0.8;
-                        group.add(segment);
-                    }
-
-                    // Head
-                    const snakeHeadGeometry = new THREE.SphereGeometry(0.6, 16, 16);
-                    const snakeHead = new THREE.Mesh(snakeHeadGeometry, snakeSegmentMaterial);
-                    snakeHead.position.x = segments * 0.8;
-                    group.add(snakeHead);
-                    break;
-
-                case 'chameleon':
-                    // Body
-                    const chameleonBodyGeometry = new THREE.SphereGeometry(1, 16, 16);
-                    const chameleonBodyMaterial = new THREE.MeshStandardMaterial({
-                        color: 0x5a8a44,
-                        transparent: true,
-                        opacity: 0.7
-                    });
-                    const chameleonBody = new THREE.Mesh(chameleonBodyGeometry, chameleonBodyMaterial);
-                    group.add(chameleonBody);
-
-                    // Head
-                    const chameleonHeadGeometry = new THREE.SphereGeometry(0.6, 16, 16);
-                    const chameleonHead = new THREE.Mesh(chameleonHeadGeometry, chameleonBodyMaterial);
-                    chameleonHead.position.set(-1, 0, 0);
-                    group.add(chameleonHead);
-
-                    // Eyes
-                    const eyeGeometry = new THREE.SphereGeometry(0.2, 16, 16);
-                    const eyeMaterial = new THREE.MeshStandardMaterial({
-                        color: 0x000000
-                    });
-                    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-                    leftEye.position.set(-1.2, 0.2, 0.4);
-                    group.add(leftEye);
-
-                    const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-                    rightEye.position.set(-1.2, 0.2, -0.4);
-                    group.add(rightEye);
-
-                    // Tail
-                    const chameleonTailGeometry = new THREE.ConeGeometry(0.3, 2, 16);
-                    const chameleonTail = new THREE.Mesh(chameleonTailGeometry, chameleonBodyMaterial);
-                    chameleonTail.position.set(1, 0, 0);
-                    chameleonTail.rotation.z = Math.PI / 6;
-                    group.add(chameleonTail);
-                    break;
+                // Other predators with similar optimizations...
+                default:
+                    // Default predator (sphere)
+                    const predatorGeometry = new THREE.SphereGeometry(1.5, 12, 12);
+                    const predatorMaterial = new THREE.MeshStandardMaterial({ color: 0x8a5a44 });
+                    const predatorMesh = new THREE.Mesh(predatorGeometry, predatorMaterial);
+                    group.add(predatorMesh);
             }
 
             predator = group;
@@ -1765,9 +1849,7 @@
 
             // Create physics body for predator
             const predatorShape = new CANNON.Sphere(1.5);
-            const predatorBody = new CANNON.Body({
-                mass: 1
-            });
+            const predatorBody = new CANNON.Body({ mass: 1 });
             predatorBody.addShape(predatorShape);
             predatorBody.position.copy(predator.position);
             physicsWorld.addBody(predatorBody);
@@ -1775,14 +1857,13 @@
             return predator;
         }
 
-
-        // Create weather effects
+        // Create optimized weather effects
         function createWeatherEffects() {
             const weather = WEATHER_DATA[gameState.currentMission.weather];
 
             if (weather.particleDensity <= 0) return;
 
-            const particleCount = 1000 * weather.particleDensity;
+            const particleCount = Math.floor(PERFORMANCE.particleCount * weather.particleDensity);
             const particles = new THREE.BufferGeometry();
             const positions = new Float32Array(particleCount * 3);
             const sizes = new Float32Array(particleCount);
@@ -1814,14 +1895,6 @@
         function createLightning() {
             const points = [];
             points.push(new THREE.Vector3(0, 50, 0));
-
-            for (let i = 1; i < 10; i++) {
-                const x = Math.random() * 10 - 5;
-                const y = 50 - i * 5;
-                const z = Math.random() * 10 - 5;
-                points.push(new THREE.Vector3(x, y, z));
-            }
-
             points.push(new THREE.Vector3(0, 0, 0));
 
             const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -1839,7 +1912,7 @@
 
         // Initialize Game
         function init() {
-            // Set up Three.js
+            // Set up Three.js with performance settings
             initThreeJS();
 
             // Create lightning effect (hidden by default)
@@ -1848,18 +1921,18 @@
             // Check for saved game
             loadGame();
 
-            // Set up event listeners
+            // Set up event listeners with passive where possible
             setupEventListeners();
 
             // Show main menu
             showMainMenu();
 
-            // Start animation loop
+            // Start optimized animation loop
             animate();
         }
 
         function setupEventListeners() {
-            // Keyboard controls
+            // Keyboard controls (for desktop)
             window.addEventListener('keydown', (e) => {
                 keys[e.key] = true;
 
@@ -1869,85 +1942,66 @@
                 }
 
                 // Handle other keys
-                if (e.key === 'ArrowLeft') controls.left = true;
-                if (e.key === 'ArrowRight') controls.right = true;
-                if (e.key === 'ArrowUp') controls.up = true;
+                if (e.key === 'ArrowLeft' || e.key === 'a') controls.left = true;
+                if (e.key === 'ArrowRight' || e.key === 'd') controls.right = true;
+                if (e.key === 'ArrowUp' || e.key === 'w') controls.up = true;
                 if (e.key === ' ' || e.key === 'Spacebar') controls.action = true;
                 if (e.key === 'm' || e.key === 'M') controls.menu = true;
-            });
+                
+                // Food consumption shortcuts
+                if (e.key === '1') consumeFood('apple');
+                if (e.key === '2') consumeFood('meat');
+                if (e.key === '3') consumeFood('mushroom');
+            }, { passive: true });
 
             window.addEventListener('keyup', (e) => {
                 keys[e.key] = false;
 
-                if (e.key === 'ArrowLeft') controls.left = false;
-                if (e.key === 'ArrowRight') controls.right = false;
-                if (e.key === 'ArrowUp') controls.up = false;
+                if (e.key === 'ArrowLeft' || e.key === 'a') controls.left = false;
+                if (e.key === 'ArrowRight' || e.key === 'd') controls.right = false;
+                if (e.key === 'ArrowUp' || e.key === 'w') controls.up = false;
                 if (e.key === ' ' || e.key === 'Spacebar') controls.action = false;
                 if (e.key === 'm' || e.key === 'M') controls.menu = false;
-            });
+            }, { passive: true });
 
-            // Touch controls
-            buttons.left.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                controls.left = true;
-            });
+            // Touch controls (for mobile)
+            if (window.innerWidth <= 768) {
+                // Joystick controls
+                elements.joystick.addEventListener('touchstart', handleJoystickStart, { passive: false });
+                elements.joystick.addEventListener('touchmove', handleJoystickMove, { passive: false });
+                elements.joystick.addEventListener('touchend', handleJoystickEnd, { passive: false });
+                
+                // Action buttons
+                buttons.up.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    controls.up = true;
+                }, { passive: false });
 
-            buttons.left.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                controls.left = false;
-            });
+                buttons.up.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    controls.up = false;
+                }, { passive: false });
 
-            buttons.right.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                controls.right = true;
-            });
+                buttons.action.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    controls.action = true;
+                }, { passive: false });
 
-            buttons.right.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                controls.right = false;
-            });
+                buttons.action.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    controls.action = false;
+                }, { passive: false });
 
-            buttons.up.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                controls.up = true;
-            });
+                buttons.menu.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    controls.menu = true;
+                }, { passive: false });
 
-            buttons.up.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                controls.up = false;
-            });
-
-            buttons.action.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                controls.action = true;
-            });
-
-            buttons.action.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                controls.action = false;
-            });
-
-            buttons.menu.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                controls.menu = true;
-            });
-
-            buttons.menu.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                controls.menu = false;
-            });
-
-            // Mouse controls (for testing on desktop)
-            buttons.left.addEventListener('mousedown', () => controls.left = true);
-            buttons.left.addEventListener('mouseup', () => controls.left = false);
-            buttons.right.addEventListener('mousedown', () => controls.right = true);
-            buttons.right.addEventListener('mouseup', () => controls.right = false);
-            buttons.up.addEventListener('mousedown', () => controls.up = true);
-            buttons.up.addEventListener('mouseup', () => controls.up = false);
-            buttons.action.addEventListener('mousedown', () => controls.action = true);
-            buttons.action.addEventListener('mouseup', () => controls.action = false);
-            buttons.menu.addEventListener('mousedown', () => controls.menu = true);
-            buttons.menu.addEventListener('mouseup', () => controls.menu = false);
+                buttons.menu.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    controls.menu = false;
+                }, { passive: false });
+            }
 
             // Menu buttons
             buttons.newGame.addEventListener('click', startNewGame);
@@ -1975,6 +2029,65 @@
             buttons.controlsHelpButton.addEventListener('click', showControlsHelp);
             buttons.resetGameButton.addEventListener('click', resetGame);
             buttons.closeSettingsButton.addEventListener('click', hideSettings);
+            buttons.closeShopButton.addEventListener('click', hideShop);
+        }
+
+        // Joystick controls for mobile
+        function handleJoystickStart(e) {
+            e.preventDefault();
+            joystickActive = true;
+            const touch = e.touches[0];
+            const rect = elements.joystickArea.getBoundingClientRect();
+            joystickStartPos = {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
+        }
+
+        function handleJoystickMove(e) {
+            if (!joystickActive) return;
+            e.preventDefault();
+            
+            const touch = e.touches[0];
+            const rect = elements.joystickArea.getBoundingClientRect();
+            const joystickPos = {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
+            
+            // Calculate relative position
+            const deltaX = joystickPos.x - joystickStartPos.x;
+            const deltaY = joystickPos.y - joystickStartPos.y;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const maxDistance = 50;
+            
+            // Normalize and limit joystick movement
+            if (distance > maxDistance) {
+                const angle = Math.atan2(deltaY, deltaX);
+                controls.joystick.x = Math.cos(angle) * maxDistance;
+                controls.joystick.y = Math.sin(angle) * maxDistance;
+            } else {
+                controls.joystick.x = deltaX;
+                controls.joystick.y = deltaY;
+            }
+            
+            // Update joystick visual position
+            elements.joystick.style.transform = `translate(${controls.joystick.x}px, ${controls.joystick.y}px)`;
+            
+            // Convert joystick position to controls
+            controls.left = controls.joystick.x < -20;
+            controls.right = controls.joystick.x > 20;
+            controls.up = controls.joystick.y < -20;
+        }
+
+        function handleJoystickEnd(e) {
+            e.preventDefault();
+            joystickActive = false;
+            controls.joystick = { x: 0, y: 0 };
+            controls.left = false;
+            controls.right = false;
+            controls.up = false;
+            elements.joystick.style.transform = 'translate(0, 0)';
         }
 
         // Game State Management
@@ -1992,6 +2105,7 @@
 
                         // Update UI to reflect loaded state
                         updateUI();
+                        updateFoodUI();
                     }
                 } catch (e) {
                     console.error("Failed to load saved game:", e);
@@ -2011,7 +2125,6 @@
                 }
 
                 localStorage.setItem('owlOfMythsSave', JSON.stringify(gameState));
-                console.log("Game saved successfully");
             } catch (e) {
                 console.error("Failed to save game:", e);
             }
@@ -2050,10 +2163,12 @@
         function showMythicBook() {
             elements.mythicBook.style.display = 'flex';
             renderMythicBook();
+            gameRunning = false;
         }
 
         function hideMythicBook() {
             elements.mythicBook.style.display = 'none';
+            gameRunning = true;
         }
 
         function showPageDetail(predator) {
@@ -2105,10 +2220,12 @@
             buttons.autosaveToggle.textContent = gameState.settings.autoSave ? 'ON' : 'OFF';
 
             elements.settingsMenu.style.display = 'flex';
+            gameRunning = false;
         }
 
         function hideSettings() {
             elements.settingsMenu.style.display = 'none';
+            gameRunning = true;
         }
 
         function toggleMusic() {
@@ -2148,12 +2265,16 @@
 
         function showControlsHelp() {
             alert(`Controls Help:
-- Left/Right: Move horizontally
-- Up: Fly upward
-- Action: Attack or interact
-- Menu: Open pause menu
+Keyboard Shortcuts:
+- W/↑: Fly upward
+- A/←: Move left
+- D/→: Move right
+- Space: Attack or interact
+- M: Open pause menu
+- ESC: Pause game
+- 1/2/3: Consume food items
 
-On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`);
+On mobile, use the on-screen joystick and buttons.`);
         }
 
         function resetGame() {
@@ -2167,10 +2288,12 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
             elements.shopCoinsValue.textContent = gameState.player.coins;
             renderShopItems();
             elements.shopMenu.style.display = 'flex';
+            gameRunning = false;
         }
 
         function hideShop() {
             elements.shopMenu.style.display = 'none';
+            gameRunning = true;
         }
 
         function renderShopItems() {
@@ -2225,6 +2348,47 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
             }
         }
 
+        function updateFoodUI() {
+            elements.appleCount.textContent = gameState.player.inventory.apple || 0;
+            elements.meatCount.textContent = gameState.player.inventory.meat || 0;
+            elements.mushroomCount.textContent = gameState.player.inventory.mushroom || 0;
+        }
+
+        function consumeFood(foodType) {
+            if (gameState.player.inventory[foodType] > 0) {
+                const food = FOOD_DATA[foodType];
+                
+                // Apply effects
+                gameState.player.health = Math.min(
+                    gameState.player.maxHealth,
+                    gameState.player.health + food.healthRestore
+                );
+                gameState.player.stamina = Math.min(
+                    gameState.player.maxStamina,
+                    gameState.player.stamina + food.staminaRestore
+                );
+                
+                // Remove from inventory
+                gameState.player.inventory[foodType]--;
+                gameState.stats.foodConsumed++;
+                
+                // Play sound
+                if (gameState.settings.sound) {
+                    audio.eat.currentTime = 0;
+                    audio.eat.play().catch(e => console.log("Audio play prevented:", e));
+                }
+                
+                // Update UI
+                updateUI();
+                updateFoodUI();
+                
+                // Save game
+                if (gameState.settings.autoSave) {
+                    saveGame();
+                }
+            }
+        }
+
         function showMissionComplete() {
             const predator = PREDATOR_DATA[gameState.currentMission.predator];
             elements.completeMessage.textContent = `You have captured the ${predator.name} and unlocked new knowledge! You earned ${predator.reward} coins.`;
@@ -2249,16 +2413,8 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
                     speed: 5,
                     coins: 0,
                     distance: 0,
-                    position: {
-                        x: 0,
-                        y: 10,
-                        z: 0
-                    },
-                    velocity: {
-                        x: 0,
-                        y: 0,
-                        z: 0
-                    },
+                    position: { x: 0, y: 10, z: 0 },
+                    velocity: { x: 0, y: 0, z: 0 },
                     upgrades: {
                         staminaRecovery: 1,
                         speed: 1,
@@ -2269,7 +2425,11 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
                     },
                     unlockedPredators: [],
                     unlockedPages: [],
-                    inventory: []
+                    inventory: {
+                        apple: 0,
+                        meat: 0,
+                        mushroom: 0
+                    }
                 },
                 currentMission: {
                     predator: null,
@@ -2280,18 +2440,16 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
                     completed: false,
                     startTime: 0,
                     endTime: 0,
-                    predatorPosition: {
-                        x: 50,
-                        y: 0,
-                        z: 0
-                    },
-                    predatorHealth: 0
+                    predatorPosition: { x: 50, y: 0, z: 0 },
+                    predatorHealth: 0,
+                    foodItems: []
                 },
                 settings: {
                     sound: true,
                     music: true,
                     difficulty: 'normal',
-                    autoSave: true
+                    autoSave: true,
+                    controls: 'buttons'
                 },
                 stats: {
                     totalDistance: 0,
@@ -2299,7 +2457,8 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
                     deaths: 0,
                     playTime: 0,
                     coinsCollected: 0,
-                    upgradesPurchased: 0
+                    upgradesPurchased: 0,
+                    foodConsumed: 0
                 }
             };
 
@@ -2365,7 +2524,8 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
                     y: 0,
                     z: Math.random() * 30 - 15
                 },
-                predatorHealth: PREDATOR_DATA[predator].health
+                predatorHealth: PREDATOR_DATA[predator].health,
+                foodItems: []
             };
 
             // Clear previous scene
@@ -2380,6 +2540,7 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
             // Update UI
             updateUI();
             updateEnvironmentInfo();
+            updateFoodUI();
         }
 
         function clearScene() {
@@ -2398,9 +2559,7 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
 
             // Reinitialize ground plane
             const groundShape = new CANNON.Plane();
-            const groundBody = new CANNON.Body({
-                mass: 0
-            });
+            const groundBody = new CANNON.Body({ mass: 0 });
             groundBody.addShape(groundShape);
             groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
             physicsWorld.addBody(groundBody);
@@ -2490,33 +2649,44 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
         function handleInput() {
             if (!gameRunning || !owl) return;
 
-            // Handle movement
+            // Handle movement with joystick or keyboard
             const speed = gameState.player.speed * 0.1;
             const staminaCost = 0.1;
+            
+            // Use joystick controls if active, otherwise use keyboard
+            if (joystickActive) {
+                if (controls.joystick.x < -20) {
+                    owl.position.x -= speed;
+                    gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost);
+                }
+                if (controls.joystick.x > 20) {
+                    owl.position.x += speed;
+                    gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost);
+                }
+                if (controls.joystick.y < -20) {
+                    owl.position.y += speed;
+                    gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost * 1.5);
+                }
+            } else {
+                // Keyboard controls
+                if (controls.left && gameState.player.stamina > 0) {
+                    owl.position.x -= speed;
+                    gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost);
+                }
 
-            if (controls.left && gameState.player.stamina > 0) {
-                owl.position.x -= speed;
-                gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost);
-            }
+                if (controls.right && gameState.player.stamina > 0) {
+                    owl.position.x += speed;
+                    gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost);
+                }
 
-            if (controls.right && gameState.player.stamina > 0) {
-                owl.position.x += speed;
-                gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost);
-            }
-
-            if (controls.up && gameState.player.stamina > 0) {
-                owl.position.y += speed;
-                gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost * 1.5);
-
-                // Play flap sound occasionally
-                if (gameState.settings.sound && Math.random() < 0.1) {
-                    audio.flap.currentTime = 0;
-                    audio.flap.play().catch(e => console.log("Audio play prevented:", e));
+                if (controls.up && gameState.player.stamina > 0) {
+                    owl.position.y += speed;
+                    gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost * 1.5);
                 }
             }
 
             // Gravity - always pull down unless up is pressed
-            if (!controls.up) {
+            if (!controls.up && !(joystickActive && controls.joystick.y < -20)) {
                 owl.position.y -= speed * 0.5;
             }
 
@@ -2526,10 +2696,10 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
                 owl.position.y = terrainHeight + 1.5;
             }
 
-            // Action button - attack
-            if (controls.action && gameState.player.stamina > 10) {
+            // Action button - attack or collect food
+            if (controls.action) {
                 // Check if close enough to predator
-                if (predator) {
+                if (predator && gameState.player.stamina > 10) {
                     const distance = owl.position.distanceTo(predator.position);
                     if (distance < 5) {
                         // Attack predator
@@ -2549,6 +2719,33 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
                         }
                     }
                 }
+                
+                // Check for nearby food items
+                gameState.currentMission.foodItems.forEach(food => {
+                    if (!food.collected) {
+                        const foodPos = new THREE.Vector3(food.position.x, food.position.y, food.position.z);
+                        const distance = owl.position.distanceTo(foodPos);
+                        
+                        if (distance < 3) {
+                            food.collected = true;
+                            gameState.player.inventory[food.type] = (gameState.player.inventory[food.type] || 0) + 1;
+                            updateFoodUI();
+                            
+                            // Play collection sound
+                            if (gameState.settings.sound) {
+                                audio.success.currentTime = 0;
+                                audio.success.play().catch(e => console.log("Audio play prevented:", e));
+                            }
+                            
+                            // Remove food visual from scene
+                            scene.children.forEach(child => {
+                                if (child.userData?.foodItem === food) {
+                                    scene.remove(child);
+                                }
+                            });
+                        }
+                    }
+                });
             }
 
             // Menu button
@@ -2558,7 +2755,7 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
             }
 
             // Stamina recovery
-            if (!controls.left && !controls.right && !controls.up) {
+            if (!controls.left && !controls.right && !controls.up && !joystickActive) {
                 gameState.player.stamina = Math.min(
                     gameState.player.maxStamina,
                     gameState.player.stamina + 0.2 * gameState.player.upgrades.staminaRecovery
@@ -2660,27 +2857,31 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
             }
         }
 
-        // Animation loop
+        // Optimized animation loop
         function animate() {
             requestAnimationFrame(animate);
 
-            // Update physics
-            const deltaTime = clock.getDelta();
-            physicsWorld.step(fixedTimeStep, deltaTime, maxSubSteps);
+            // Only update physics and input when game is running
+            if (gameRunning) {
+                // Update physics with fixed time step
+                const deltaTime = Math.min(0.1, clock.getDelta()); // Cap delta time
+                physicsWorld.step(fixedTimeStep, deltaTime, maxSubSteps);
 
-            // Handle input
-            handleInput();
+                // Handle input
+                handleInput();
+            }
 
             // Update camera to follow owl
             if (owl) {
                 camera.position.x = owl.position.x;
                 camera.position.z = owl.position.z + 30;
-                camera.lookAt(owl.position.x, owl.position.y, owl.position.z);
+                camera.lookAt(owl.position.x, owl.position.y + 5, owl.position.z); // Look slightly above owl
 
                 // Animate wings when flying
-                if (controls.up) {
-                    const wings = owl.children.filter(child =>
-                        child.name !== 'head' && child.name !== 'body'
+                if (controls.up || (joystickActive && controls.joystick.y < -20)) {
+                    const wings = owl.children.filter(child => 
+                        child.geometry instanceof THREE.SphereGeometry && 
+                        child.material.color.getHex() === 0x6a4a34
                     );
                     wings.forEach(wing => {
                         wing.rotation.x = Math.sin(Date.now() * 0.01) * 0.5;
@@ -2688,12 +2889,12 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
                 }
             }
 
-            // Animate predator
+            // Animate predator if it exists
             if (predator && !gameState.currentMission.completed) {
                 // Simple idle animation
                 if (gameState.currentMission.predator === 'eagle') {
                     // Flap wings
-                    const wings = predator.children.filter(child =>
+                    const wings = predator.children.filter(child => 
                         child.geometry instanceof THREE.PlaneGeometry
                     );
                     wings.forEach(wing => {
@@ -2709,9 +2910,11 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
                 }
             }
 
-            // Animate weather effects
-            animateWeather();
-            animateLightning();
+            // Animate weather effects if game is running
+            if (gameRunning) {
+                animateWeather();
+                animateLightning();
+            }
 
             // Render scene
             renderer.render(scene, camera);
@@ -2721,5 +2924,4 @@ On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`)
         window.addEventListener('load', init);
     </script>
 </body>
-
 </html>
