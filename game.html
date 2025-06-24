@@ -1,0 +1,2725 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owl of Myths: The Eternal Journey</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            overflow: hidden;
+            background-color: #0a0a12;
+            color: #e0e0e0;
+            touch-action: manipulation;
+            height: 100vh;
+            font-family: 'Courier New', monospace;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Orientation Warning */
+        #orientation-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #orientation-warning img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            animation: rotate 2s infinite linear;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* UI Elements */
+        #ui-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .health-bar-container,
+        .stamina-bar-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 200px;
+            height: 30px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 2px solid #8a5a44;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .stamina-bar-container {
+            top: 60px;
+        }
+
+        .health-bar,
+        .stamina-bar {
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s;
+        }
+
+        .health-bar {
+            background-color: #8a5a44;
+        }
+
+        .stamina-bar {
+            background-color: #5a8a44;
+        }
+
+        .stats-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 2px solid #8a5a44;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .stat-label {
+            color: #8a5a44;
+            margin-right: 10px;
+        }
+
+        .stat-value {
+            color: #e0d0a0;
+        }
+
+        /* Controls */
+        #controls {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            pointer-events: auto;
+        }
+
+        .control-button {
+            width: 70px;
+            height: 70px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 2px solid #8a5a44;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #e0d0a0;
+            font-size: 1.8rem;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .control-button:active {
+            background-color: rgba(138, 90, 68, 0.5);
+            transform: scale(0.95);
+        }
+
+        /* Menus */
+        .menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 20, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            pointer-events: auto;
+        }
+
+        .menu-title {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: #8a5a44;
+            text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .menu-button {
+            background-color: #4a3520;
+            color: #e0d0a0;
+            border: 3px solid #8a5a44;
+            border-radius: 8px;
+            padding: 12px 24px;
+            margin: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            min-width: 200px;
+            text-align: center;
+            transition: all 0.2s;
+            pointer-events: auto;
+        }
+
+        .menu-button:hover {
+            background-color: #5a4530;
+            transform: scale(1.05);
+        }
+
+        /* Mythic Book */
+        #mythic-book {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 800px;
+            height: 80%;
+            max-height: 600px;
+            background-color: #1a0a00;
+            border: 3px solid #8a5a44;
+            border-radius: 10px;
+            z-index: 30;
+            padding: 20px;
+            overflow: hidden;
+            pointer-events: auto;
+            flex-direction: column;
+        }
+
+        .book-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #8a5a44;
+        }
+
+        .book-title {
+            font-size: 1.8rem;
+            color: #8a5a44;
+        }
+
+        .close-button {
+            background-color: #4a3520;
+            color: #e0d0a0;
+            border: 2px solid #8a5a44;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .page-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 10px;
+        }
+
+        .page {
+            width: 100%;
+            aspect-ratio: 3/4;
+            background-color: #1a0a00;
+            border: 2px solid #8a5a44;
+            padding: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .page:hover {
+            transform: scale(1.05);
+        }
+
+        .page-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .page-title {
+            font-size: 1rem;
+            color: #8a5a44;
+            margin-bottom: 5px;
+        }
+
+        .page-status {
+            font-size: 0.8rem;
+            color: #5a5a5a;
+        }
+
+        .page-unlocked .page-status {
+            color: #5a8a44;
+        }
+
+        /* Page Detail View */
+        #page-detail {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 500px;
+            background-color: #1a0a00;
+            border: 3px solid #8a5a44;
+            padding: 20px;
+            z-index: 40;
+            flex-direction: column;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #8a5a44;
+        }
+
+        .detail-title {
+            font-size: 1.5rem;
+            color: #8a5a44;
+        }
+
+        .detail-content {
+            line-height: 1.5;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* Mission Complete Screen */
+        #mission-complete {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 20, 0, 0.8);
+            z-index: 25;
+            text-align: center;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .complete-title {
+            font-size: 2.5rem;
+            color: #5a8a44;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #000;
+            animation: pulse 2s infinite;
+        }
+
+        .complete-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            max-width: 80%;
+            line-height: 1.6;
+        }
+
+        /* Settings Menu */
+        #settings-menu {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 500px;
+            background-color: #1a0a00;
+            border: 3px solid #8a5a44;
+            padding: 20px;
+            z-index: 30;
+            flex-direction: column;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .settings-label {
+            font-size: 1rem;
+            color: #8a5a44;
+        }
+
+        .settings-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-button {
+            background-color: #4a3520;
+            color: #e0d0a0;
+            border: 2px solid #8a5a44;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        /* Shop Menu */
+        #shop-menu {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            height: 70%;
+            max-height: 500px;
+            background-color: #1a0a00;
+            border: 3px solid #8a5a44;
+            padding: 20px;
+            z-index: 30;
+            flex-direction: column;
+            pointer-events: auto;
+            overflow: hidden;
+        }
+
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #8a5a44;
+        }
+
+        .shop-title {
+            font-size: 1.8rem;
+            color: #8a5a44;
+        }
+
+        .shop-coins {
+            font-size: 1.2rem;
+            color: #e0d0a0;
+        }
+
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 10px;
+        }
+
+        .shop-item {
+            background-color: #2a1a00;
+            border: 2px solid #8a5a44;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .item-icon {
+            font-size: 2rem;
+        }
+
+        .item-name {
+            font-size: 1rem;
+            color: #8a5a44;
+            text-align: center;
+        }
+
+        .item-price {
+            font-size: 0.9rem;
+            color: #e0d0a0;
+        }
+
+        .item-button {
+            background-color: #4a3520;
+            color: #e0d0a0;
+            border: 1px solid #8a5a44;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            width: 100%;
+        }
+
+        .item-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Environment Info */
+        #environment-info {
+            position: absolute;
+            bottom: 120px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 2px solid #8a5a44;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .environment-item {
+            display: flex;
+        }
+
+        .environment-label {
+            color: #8a5a44;
+            margin-right: 10px;
+            min-width: 70px;
+        }
+
+        .environment-value {
+            color: #e0d0a0;
+        }
+
+        /* Mobile Controls */
+        @media (max-width: 768px) {
+            .control-button {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .menu-title {
+                font-size: 2rem;
+            }
+
+            .menu-button {
+                min-width: 160px;
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+
+            .health-bar-container,
+            .stamina-bar-container {
+                width: 150px;
+                height: 25px;
+            }
+
+            .stats-container {
+                top: 10px;
+                right: 10px;
+                padding: 8px;
+            }
+
+            .stat-item {
+                font-size: 12px;
+            }
+        }
+
+        @media (orientation: portrait) {
+            #orientation-warning {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Orientation Warning -->
+    <div id="orientation-warning">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2UwZDBhMCIgZD0iTTksN0gxNVYxN0g5VjdNMTksMTlIMVY1SDE5VjE5WiIvPjwvc3ZnPg==" alt="Rotate Device">
+        <h2>Please rotate your device</h2>
+        <p>This game is designed to be played in landscape mode.</p>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+
+        <!-- UI Container -->
+        <div id="ui-container">
+            <!-- Health and Stamina Bars -->
+            <div class="health-bar-container">
+                <div class="health-bar" id="health-bar"></div>
+            </div>
+            <div class="stamina-bar-container">
+                <div class="stamina-bar" id="stamina-bar"></div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-container">
+                <div class="stat-item">
+                    <span class="stat-label">DISTANCE</span>
+                    <span class="stat-value" id="distance-value">0 KM</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">TARGET</span>
+                    <span class="stat-value" id="target-value">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">COINS</span>
+                    <span class="stat-value" id="coins-value">0</span>
+                </div>
+            </div>
+
+            <!-- Environment Info -->
+            <div id="environment-info">
+                <div class="environment-item">
+                    <span class="environment-label">BIOME</span>
+                    <span class="environment-value" id="biome-value">-</span>
+                </div>
+                <div class="environment-item">
+                    <span class="environment-label">SEASON</span>
+                    <span class="environment-value" id="season-value">-</span>
+                </div>
+                <div class="environment-item">
+                    <span class="environment-label">WEATHER</span>
+                    <span class="environment-value" id="weather-value">-</span>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div id="controls">
+                <div class="control-button" id="left-button">←</div>
+                <div class="control-button" id="up-button">↑</div>
+                <div class="control-button" id="right-button">→</div>
+                <div class="control-button" id="action-button">A</div>
+                <div class="control-button" id="menu-button">M</div>
+            </div>
+        </div>
+
+        <!-- Main Menu -->
+        <div id="main-menu" class="menu">
+            <h1 class="menu-title">OWL OF MYTHS</h1>
+            <button class="menu-button" id="new-game-button">NEW JOURNEY</button>
+            <button class="menu-button" id="continue-button">CONTINUE</button>
+            <button class="menu-button" id="mythic-book-button">MYTHIC BOOK</button>
+            <button class="menu-button" id="shop-button">SHOP</button>
+            <button class="menu-button" id="settings-button">SETTINGS</button>
+        </div>
+
+        <!-- Pause Menu -->
+        <div id="pause-menu" class="menu">
+            <h1 class="menu-title">PAUSED</h1>
+            <button class="menu-button" id="resume-button">RESUME</button>
+            <button class="menu-button" id="save-exit-button">SAVE & EXIT</button>
+            <button class="menu-button" id="book-from-pause">MYTHIC BOOK</button>
+            <button class="menu-button" id="shop-from-pause">SHOP</button>
+        </div>
+
+        <!-- Mythic Book -->
+        <div id="mythic-book">
+            <div class="book-header">
+                <h2 class="book-title">MYTHIC BOOK</h2>
+                <button class="close-button" id="close-book-button">CLOSE</button>
+            </div>
+            <div class="page-container" id="page-container">
+                <!-- Pages will be generated here -->
+            </div>
+        </div>
+
+        <!-- Page Detail View -->
+        <div id="page-detail">
+            <div class="detail-header">
+                <h3 class="detail-title" id="detail-title">-</h3>
+                <button class="close-button" id="close-detail-button">CLOSE</button>
+            </div>
+            <div class="detail-content" id="detail-content">
+                <!-- Page content will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Mission Complete Screen -->
+        <div id="mission-complete">
+            <h2 class="complete-title">MISSION COMPLETE</h2>
+            <p class="complete-message" id="complete-message"></p>
+            <button class="menu-button" id="continue-journey-button">CONTINUE JOURNEY</button>
+        </div>
+
+        <!-- Settings Menu -->
+        <div id="settings-menu">
+            <div class="book-header">
+                <h2 class="book-title">SETTINGS</h2>
+                <button class="close-button" id="close-settings-button">CLOSE</button>
+            </div>
+
+            <div class="settings-item">
+                <span class="settings-label">Music</span>
+                <div class="settings-control">
+                    <button class="settings-button" id="music-toggle">ON</button>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <span class="settings-label">Sound Effects</span>
+                <div class="settings-control">
+                    <button class="settings-button" id="sound-toggle">ON</button>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <span class="settings-label">Difficulty</span>
+                <div class="settings-control">
+                    <button class="settings-button" id="difficulty-button">NORMAL</button>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <span class="settings-label">Auto-Save</span>
+                <div class="settings-control">
+                    <button class="settings-button" id="autosave-toggle">ON</button>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <span class="settings-label">Controls</span>
+                <div class="settings-control">
+                    <button class="settings-button" id="controls-help-button">HELP</button>
+                </div>
+            </div>
+
+            <button class="menu-button" id="reset-game-button" style="margin-top: 20px;">RESET GAME</button>
+        </div>
+
+        <!-- Shop Menu -->
+        <div id="shop-menu">
+            <div class="shop-header">
+                <h2 class="shop-title">MYTHIC SHOP</h2>
+                <div class="shop-coins">COINS: <span id="shop-coins-value">0</span></div>
+            </div>
+
+            <div class="shop-items" id="shop-items">
+                <!-- Shop items will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Constants
+        const GAME_VERSION = "1.0.0";
+        const BIOMES = ['forest', 'desert', 'mountains', 'swamp', 'caves'];
+        const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
+        const WEATHER = ['clear', 'rain', 'storm', 'fog', 'heatwave', 'snow'];
+        const PREDATORS = ['tiger', 'eagle', 'fox', 'wolf', 'snake', 'chameleon'];
+        const DIFFICULTIES = ['easy', 'normal', 'hard', 'extreme'];
+
+        // Game Data
+        const PREDATOR_DATA = {
+            tiger: {
+                name: "Tiger",
+                difficulty: 3,
+                biome: 'forest',
+                description: "The tiger's roar breaks silence, but fears the cry of dusk.",
+                weakness: "Avoid open ground. Use trees to stay above its reach.",
+                tactics: "Lure it near cliffs or water where it moves slower.",
+                speed: 1.5,
+                health: 100,
+                reward: 30
+            },
+            eagle: {
+                name: "Eagle",
+                difficulty: 4,
+                biome: 'mountains',
+                description: "The eagle sees all but the shadow beneath its wings.",
+                weakness: "Fly low when it circles. Attack when it dives.",
+                tactics: "Use clouds or rock formations to break line of sight.",
+                speed: 2.0,
+                health: 80,
+                reward: 40
+            },
+            fox: {
+                name: "Fox",
+                difficulty: 2,
+                biome: 'forest',
+                description: "The fox's cunning is matched only by its fear of truth.",
+                weakness: "It always returns to its den after three turns.",
+                tactics: "Track its den and ambush it there.",
+                speed: 1.8,
+                health: 70,
+                reward: 20
+            },
+            wolf: {
+                name: "Wolf",
+                difficulty: 3,
+                biome: 'mountains',
+                description: "The wolf hunts as one, but fears the lone howl.",
+                weakness: "Separate it from the pack to weaken it.",
+                tactics: "Use narrow passages where numbers don't help.",
+                speed: 1.7,
+                health: 90,
+                reward: 35
+            },
+            snake: {
+                name: "Snake",
+                difficulty: 2,
+                biome: 'swamp',
+                description: "The snake strikes without sound but fears the vibration.",
+                weakness: "It can't track you if you don't move on the ground.",
+                tactics: "Stay airborne and attack from above.",
+                speed: 1.3,
+                health: 60,
+                reward: 25
+            },
+            chameleon: {
+                name: "Chameleon",
+                difficulty: 5,
+                biome: 'forest',
+                description: "The chameleon hides in plain sight but fears the mirror.",
+                weakness: "It can't change color when moving quickly.",
+                tactics: "Force it to move rapidly to reveal itself.",
+                speed: 1.2,
+                health: 50,
+                reward: 50
+            }
+        };
+
+
+
+        const BIOME_DATA = {
+            forest: {
+                name: "Ancient Forest",
+                hazards: ['thick foliage', 'falling branches', 'hidden predators'],
+                staminaEffect: 1.0,
+                visibility: 0.8,
+                color: 0x0a300a,
+                terrainHeight: 5,
+                treeDensity: 0.8
+            },
+            desert: {
+                name: "Scorching Desert",
+                hazards: ['sandstorms', 'heat exhaustion', 'quicksand'],
+                staminaEffect: 0.6,
+                visibility: 1.0,
+                color: 0xd4b16a,
+                terrainHeight: 2,
+                treeDensity: 0.1
+            },
+            mountains: {
+                name: "Mystic Mountains",
+                hazards: ['strong winds', 'avalanches', 'thin air'],
+                staminaEffect: 0.8,
+                visibility: 0.9,
+                color: 0x3a4a6b,
+                terrainHeight: 15,
+                treeDensity: 0.5
+            },
+            swamp: {
+                name: "Murky Swamp",
+                hazards: ['deep water', 'toxic gases', 'sinking mud'],
+                staminaEffect: 0.7,
+                visibility: 0.6,
+                color: 0x2a4a3a,
+                terrainHeight: 3,
+                treeDensity: 0.6
+            },
+            caves: {
+                name: "Dark Caves",
+                hazards: ['complete darkness', 'echo confusion', 'falling rocks'],
+                staminaEffect: 0.9,
+                visibility: 0.3,
+                color: 0x1a1a1a,
+                terrainHeight: 8,
+                treeDensity: 0.2
+            }
+        };
+
+        const SEASON_DATA = {
+            spring: {
+                name: "Spring",
+                effect: "New growth provides hiding spots but also conceals predators.",
+                staminaEffect: 1.1,
+                visibility: 0.8,
+                particleColor: 0x44aa44,
+                particleDensity: 0.3
+            },
+            summer: {
+                name: "Summer",
+                effect: "Heat can exhaust you quickly but dries up some hazards.",
+                staminaEffect: 0.8,
+                visibility: 0.9,
+                particleColor: 0xdddd00,
+                particleDensity: 0.1
+            },
+            autumn: {
+                name: "Autumn",
+                effect: "Falling leaves reveal movement but provide camouflage.",
+                staminaEffect: 1.0,
+                visibility: 0.7,
+                particleColor: 0xaa5500,
+                particleDensity: 0.5
+            },
+            winter: {
+                name: "Winter",
+                effect: "Cold saps stamina but tracks are easier to follow.",
+                staminaEffect: 0.7,
+                visibility: 0.6,
+                particleColor: 0xffffff,
+                particleDensity: 0.7
+            }
+        };
+
+        const WEATHER_DATA = {
+            clear: {
+                name: "Clear",
+                effect: "Normal conditions with no special effects.",
+                staminaEffect: 1.0,
+                visibility: 1.0,
+                particleDensity: 0
+            },
+            rain: {
+                name: "Rain",
+                effect: "Reduces visibility and makes surfaces slippery.",
+                staminaEffect: 0.9,
+                visibility: 0.7,
+                particleDensity: 0.8,
+                particleColor: 0xaaaaaa,
+                particleSpeed: 0.5
+            },
+            storm: {
+                name: "Storm",
+                effect: "Dangerous lightning and strong winds.",
+                staminaEffect: 0.8,
+                visibility: 0.5,
+                particleDensity: 1.0,
+                particleColor: 0x666666,
+                particleSpeed: 1.0,
+                lightningChance: 0.01
+            },
+            fog: {
+                name: "Fog",
+                effect: "Greatly reduces visibility.",
+                staminaEffect: 1.0,
+                visibility: 0.3,
+                particleDensity: 0.6,
+                particleColor: 0xcccccc,
+                particleSpeed: 0.1
+            },
+            heatwave: {
+                name: "Heatwave",
+                effect: "Rapidly drains stamina.",
+                staminaEffect: 0.6,
+                visibility: 0.9,
+                particleDensity: 0.2,
+                particleColor: 0xff6600,
+                particleSpeed: 0.3
+            },
+            snow: {
+                name: "Snow",
+                effect: "Reduces visibility and movement speed.",
+                staminaEffect: 0.7,
+                visibility: 0.6,
+                particleDensity: 0.7,
+                particleColor: 0xffffff,
+                particleSpeed: 0.2
+            }
+        };
+
+        const SHOP_ITEMS = [{
+                id: 'stamina-upgrade',
+                name: "Stamina Upgrade",
+                description: "Permanently increases your maximum stamina by 20 points.",
+                price: 50,
+                icon: "💪",
+                effect: (gameState) => {
+                    gameState.player.maxStamina += 20;
+                    gameState.player.stamina = gameState.player.maxStamina;
+                }
+            },
+            {
+                id: 'health-upgrade',
+                name: "Health Upgrade",
+                description: "Permanently increases your maximum health by 10 points.",
+                price: 60,
+                icon: "❤️",
+                effect: (gameState) => {
+                    gameState.player.maxHealth += 10;
+                    gameState.player.health = gameState.player.maxHealth;
+                }
+            },
+            {
+                id: 'speed-upgrade',
+                name: "Speed Upgrade",
+                description: "Permanently increases your movement speed by 10%.",
+                price: 70,
+                icon: "⚡",
+                effect: (gameState) => {
+                    gameState.player.speed *= 1.1;
+                }
+            },
+            {
+                id: 'heat-resistance',
+                name: "Heat Resistance",
+                description: "Reduces stamina drain in hot environments by 30%.",
+                price: 40,
+                icon: "☀️",
+                effect: (gameState) => {
+                    gameState.player.upgrades.heatResistance = true;
+                }
+            },
+            {
+                id: 'cold-resistance',
+                name: "Cold Resistance",
+                description: "Reduces stamina drain in cold environments by 30%.",
+                price: 40,
+                icon: "❄️",
+                effect: (gameState) => {
+                    gameState.player.upgrades.coldResistance = true;
+                }
+            },
+            {
+                id: 'chameleon-detector',
+                name: "Chameleon Detector",
+                description: "Reveals chameleons even when they're camouflaged.",
+                price: 80,
+                icon: "👁️",
+                effect: (gameState) => {
+                    gameState.player.upgrades.chameleonDetector = true;
+                }
+            },
+            {
+                id: 'health-potion',
+                name: "Health Potion",
+                description: "Restores 30 health points immediately.",
+                price: 30,
+                icon: "🧪",
+                effect: (gameState) => {
+                    gameState.player.health = Math.min(gameState.player.maxHealth, gameState.player.health + 30);
+                },
+                consumable: true
+            },
+            {
+                id: 'stamina-potion',
+                name: "Stamina Potion",
+                description: "Restores 40 stamina points immediately.",
+                price: 25,
+                icon: "🧃",
+                effect: (gameState) => {
+                    gameState.player.stamina = Math.min(gameState.player.maxStamina, gameState.player.stamina + 40);
+                },
+                consumable: true
+            }
+        ];
+
+        // Game State
+        let gameState = {
+            player: {
+                health: 100,
+                maxHealth: 100,
+                stamina: 100,
+                maxStamina: 100,
+                speed: 5,
+                coins: 0,
+                distance: 0,
+                position: {
+                    x: 0,
+                    y: 10,
+                    z: 0
+                },
+                velocity: {
+                    x: 0,
+                    y: 0,
+                    z: 0
+                },
+                upgrades: {
+                    staminaRecovery: 1,
+                    speed: 1,
+                    vision: 1,
+                    heatResistance: false,
+                    coldResistance: false,
+                    chameleonDetector: false
+                },
+                unlockedPredators: [],
+                unlockedPages: [],
+                inventory: []
+            },
+            currentMission: {
+                predator: null,
+                biome: null,
+                season: null,
+                weather: null,
+                started: false,
+                completed: false,
+                startTime: 0,
+                endTime: 0,
+                predatorPosition: {
+                    x: 50,
+                    y: 0,
+                    z: 0
+                },
+                predatorHealth: 0
+            },
+            settings: {
+                sound: true,
+                music: true,
+                difficulty: 'normal',
+                autoSave: true
+            },
+            stats: {
+                totalDistance: 0,
+                predatorsCaptured: 0,
+                deaths: 0,
+                playTime: 0,
+                coinsCollected: 0,
+                upgradesPurchased: 0
+            }
+        };
+
+        // Three.js Variables
+        let scene, camera, renderer, world, clock, mixer, owlModel, predatorModel;
+        let owl, predator, terrain, particles, weatherParticles, lightning;
+        let directionalLight, ambientLight, hemisphereLight;
+        let controls = {
+            left: false,
+            right: false,
+            up: false,
+            action: false,
+            menu: false
+        };
+
+        // Physics Variables
+        let physicsWorld;
+        const fixedTimeStep = 1.0 / 60.0;
+        const maxSubSteps = 3;
+
+        // DOM Elements
+        const elements = {
+            gameContainer: document.getElementById('game-container'),
+            gameCanvas: document.getElementById('game-canvas'),
+            mainMenu: document.getElementById('main-menu'),
+            pauseMenu: document.getElementById('pause-menu'),
+            mythicBook: document.getElementById('mythic-book'),
+            pageDetail: document.getElementById('page-detail'),
+            missionComplete: document.getElementById('mission-complete'),
+            settingsMenu: document.getElementById('settings-menu'),
+            shopMenu: document.getElementById('shop-menu'),
+            healthBar: document.getElementById('health-bar'),
+            staminaBar: document.getElementById('stamina-bar'),
+            distanceValue: document.getElementById('distance-value'),
+            targetValue: document.getElementById('target-value'),
+            coinsValue: document.getElementById('coins-value'),
+            completeMessage: document.getElementById('complete-message'),
+            pageContainer: document.getElementById('page-container'),
+            detailTitle: document.getElementById('detail-title'),
+            detailContent: document.getElementById('detail-content'),
+            orientationWarning: document.getElementById('orientation-warning'),
+            biomeValue: document.getElementById('biome-value'),
+            seasonValue: document.getElementById('season-value'),
+            weatherValue: document.getElementById('weather-value'),
+            shopCoinsValue: document.getElementById('shop-coins-value'),
+            shopItems: document.getElementById('shop-items')
+        };
+
+        // Buttons
+        const buttons = {
+            newGame: document.getElementById('new-game-button'),
+            continue: document.getElementById('continue-button'),
+            mythicBook: document.getElementById('mythic-book-button'),
+            shop: document.getElementById('shop-button'),
+            shopFromPause: document.getElementById('shop-from-pause'),
+            settings: document.getElementById('settings-button'),
+            resume: document.getElementById('resume-button'),
+            saveExit: document.getElementById('save-exit-button'),
+            bookFromPause: document.getElementById('book-from-pause'),
+            closeBook: document.getElementById('close-book-button'),
+            closeDetail: document.getElementById('close-detail-button'),
+            continueJourney: document.getElementById('continue-journey-button'),
+            left: document.getElementById('left-button'),
+            right: document.getElementById('right-button'),
+            up: document.getElementById('up-button'),
+            action: document.getElementById('action-button'),
+            menu: document.getElementById('menu-button'),
+            musicToggle: document.getElementById('music-toggle'),
+            soundToggle: document.getElementById('sound-toggle'),
+            difficultyButton: document.getElementById('difficulty-button'),
+            autosaveToggle: document.getElementById('autosave-toggle'),
+            controlsHelpButton: document.getElementById('controls-help-button'),
+            resetGameButton: document.getElementById('reset-game-button'),
+            closeSettingsButton: document.getElementById('close-settings-button')
+        };
+
+        // Game Variables
+        let gameRunning = false;
+        let lastTime = 0;
+        let keys = {};
+        let touchControls = {
+            left: false,
+            right: false,
+            up: false,
+            action: false
+        };
+
+        // Audio
+        const audio = {
+            flap: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-bird-flapping-wings-2134.mp3'),
+            wind: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-wind-against-a-window-1495.mp3'),
+            rain: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-rain-loop-1244.mp3'),
+            thunder: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-thunder-strike-1680.mp3'),
+            success: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3'),
+            damage: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-player-jumping-in-a-video-game-2043.mp3'),
+            background: new Audio('https://assets.mixkit.co/music/preview/mixkit-ethereal-fairy-pipe-consort-1450.mp3')
+        };
+
+        // Initialize Three.js scene
+        function initThreeJS() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.01);
+
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 15, 30);
+            camera.lookAt(0, 10, 0);
+
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({
+                canvas: elements.gameCanvas,
+                antialias: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            // Add lights
+            directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(0, 50, 50);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 500;
+            directionalLight.shadow.camera.left = -100;
+            directionalLight.shadow.camera.right = 100;
+            directionalLight.shadow.camera.top = 100;
+            directionalLight.shadow.camera.bottom = -100;
+            scene.add(directionalLight);
+
+            ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5);
+            scene.add(hemisphereLight);
+
+            // Create clock for animations
+            clock = new THREE.Clock();
+
+            // Initialize physics world
+            initPhysics();
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function initPhysics() {
+            // Setup Cannon.js physics world
+            physicsWorld = new CANNON.World();
+            physicsWorld.gravity.set(0, -9.82, 0);
+            physicsWorld.broadphase = new CANNON.NaiveBroadphase();
+            physicsWorld.solver.iterations = 10;
+
+            // Create ground plane
+            const groundShape = new CANNON.Plane();
+            const groundBody = new CANNON.Body({
+                mass: 0
+            });
+            groundBody.addShape(groundShape);
+            groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            physicsWorld.addBody(groundBody);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Create terrain
+        function createTerrain() {
+            const biome = BIOME_DATA[gameState.currentMission.biome];
+            const geometry = new THREE.PlaneGeometry(200, 200, 50, 50);
+
+            // Create height variations
+            const position = geometry.attributes.position;
+            for (let i = 0; i < position.count; i++) {
+                const x = position.getX(i);
+                const z = position.getZ(i);
+
+                // Generate terrain height with Perlin-like noise
+                let height = biome.terrainHeight * (
+                    Math.sin(x * 0.1) * Math.cos(z * 0.1) +
+                    0.5 * Math.sin(x * 0.2) * Math.cos(z * 0.2) +
+                    0.25 * Math.sin(x * 0.4) * Math.cos(z * 0.4)
+                );
+
+                position.setY(i, height);
+            }
+
+            geometry.computeVertexNormals();
+
+            const material = new THREE.MeshStandardMaterial({
+                color: biome.color,
+                side: THREE.DoubleSide,
+                flatShading: true
+            });
+
+            terrain = new THREE.Mesh(geometry, material);
+            terrain.rotation.x = -Math.PI / 2;
+            terrain.receiveShadow = true;
+            scene.add(terrain);
+
+            // Add trees for forest biome
+            if (biome.treeDensity > 0) {
+                for (let i = 0; i < 100 * biome.treeDensity; i++) {
+                    const tree = createTree();
+                    tree.position.x = Math.random() * 180 - 90;
+                    tree.position.z = Math.random() * 180 - 90;
+
+                    // Adjust y position based on terrain
+                    const terrainHeight = getTerrainHeight(tree.position.x, tree.position.z);
+                    tree.position.y = terrainHeight;
+
+                    scene.add(tree);
+                }
+            }
+        }
+
+        function createTree() {
+            const group = new THREE.Group();
+
+            // Trunk
+            const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.7, 5, 8);
+            const trunkMaterial = new THREE.MeshStandardMaterial({
+                color: 0x8B4513
+            });
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            trunk.position.y = 2.5;
+            trunk.castShadow = true;
+            group.add(trunk);
+
+            // Leaves
+            const leavesGeometry = new THREE.SphereGeometry(3, 8, 8);
+            const leavesMaterial = new THREE.MeshStandardMaterial({
+                color: 0x228B22
+            });
+            const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+            leaves.position.y = 5;
+            leaves.castShadow = true;
+            group.add(leaves);
+
+            return group;
+        }
+
+        function getTerrainHeight(x, z) {
+            if (!terrain) return 0;
+
+            // Convert world coordinates to geometry vertices
+            const geometry = terrain.geometry;
+            const position = geometry.attributes.position;
+
+            // Find closest vertex (simplified approach)
+            let closestDistance = Infinity;
+            let closestHeight = 0;
+
+            for (let i = 0; i < position.count; i++) {
+                const vx = position.getX(i);
+                const vz = position.getZ(i);
+                const distance = Math.sqrt((vx - x) ** 2 + (vz - z) ** 2);
+
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestHeight = position.getY(i);
+                }
+            }
+
+            return closestHeight;
+        }
+
+        // Create owl character
+        function createOwl() {
+            const group = new THREE.Group();
+
+            // Body
+            const bodyGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+            const bodyMaterial = new THREE.MeshStandardMaterial({
+                color: 0x8a5a44
+            });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.castShadow = true;
+            group.add(body);
+
+            // Head
+            const headGeometry = new THREE.SphereGeometry(1, 16, 16);
+            const headMaterial = new THREE.MeshStandardMaterial({
+                color: 0x8a5a44
+            });
+            const head = new THREE.Mesh(headGeometry, headMaterial);
+            head.position.y = 1.5;
+            head.castShadow = true;
+            group.add(head);
+
+            // Eyes
+            const eyeGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+            const eyeMaterial = new THREE.MeshStandardMaterial({
+                color: 0xffffff
+            });
+
+            const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            leftEye.position.set(-0.4, 1.6, 0.8);
+            group.add(leftEye);
+
+            const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            rightEye.position.set(0.4, 1.6, 0.8);
+            group.add(rightEye);
+
+            // Pupils
+            const pupilGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const pupilMaterial = new THREE.MeshStandardMaterial({
+                color: 0x000000
+            });
+
+            const leftPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+            leftPupil.position.set(-0.4, 1.6, 1.1);
+            group.add(leftPupil);
+
+            const rightPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+            rightPupil.position.set(0.4, 1.6, 1.1);
+            group.add(rightPupil);
+
+            // Beak
+            const beakGeometry = new THREE.ConeGeometry(0.2, 0.5, 16);
+            const beakMaterial = new THREE.MeshStandardMaterial({
+                color: 0xe8a040
+            });
+            const beak = new THREE.Mesh(beakGeometry, beakMaterial);
+            beak.position.set(0, 1.4, 1.1);
+            beak.rotation.x = Math.PI / 2;
+            group.add(beak);
+
+            // Wings
+            const wingGeometry = new THREE.SphereGeometry(1.2, 16, 16, 0, Math.PI, 0, Math.PI / 2);
+            const wingMaterial = new THREE.MeshStandardMaterial({
+                color: 0x6a4a34
+            });
+
+            const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+            leftWing.position.set(-1.5, 0.5, 0);
+            leftWing.rotation.z = Math.PI / 4;
+            leftWing.castShadow = true;
+            group.add(leftWing);
+
+            const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+            rightWing.position.set(1.5, 0.5, 0);
+            rightWing.rotation.z = -Math.PI / 4;
+            rightWing.castShadow = true;
+            group.add(rightWing);
+
+            // Tail
+            const tailGeometry = new THREE.ConeGeometry(0.5, 1.5, 16);
+            const tailMaterial = new THREE.MeshStandardMaterial({
+                color: 0x6a4a34
+            });
+            const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+            tail.position.set(0, 0, -1.5);
+            tail.rotation.x = Math.PI / 2;
+            group.add(tail);
+
+            owl = group;
+            owl.position.copy(new THREE.Vector3(
+                gameState.player.position.x,
+                gameState.player.position.y,
+                gameState.player.position.z
+            ));
+            scene.add(owl);
+
+            // Create physics body for owl
+            const owlShape = new CANNON.Sphere(1.5);
+            const owlBody = new CANNON.Body({
+                mass: 1
+            });
+            owlBody.addShape(owlShape);
+            owlBody.position.copy(owl.position);
+            physicsWorld.addBody(owlBody);
+
+            return owl;
+        }
+
+        // ... (rest of your game data objects remain the same)
+
+        // Create predator - fixed version
+        function createPredator() {
+            if (!gameState.currentMission.predator) return;
+
+            const predatorType = gameState.currentMission.predator;
+            const predatorInfo = PREDATOR_DATA[predatorType];
+
+            const group = new THREE.Group();
+
+            switch (predatorType) {
+                case 'tiger':
+                    // Body
+                    const tigerBodyGeometry = new THREE.BoxGeometry(3, 1.5, 2);
+                    const tigerBodyMaterial = new THREE.MeshStandardMaterial({
+                        color: 0xe8a040
+                    });
+                    const tigerBody = new THREE.Mesh(tigerBodyGeometry, tigerBodyMaterial);
+                    tigerBody.castShadow = true;
+                    group.add(tigerBody);
+
+                    // Head
+                    const tigerHeadGeometry = new THREE.BoxGeometry(1.5, 1, 1);
+                    const tigerHead = new THREE.Mesh(tigerHeadGeometry, tigerBodyMaterial);
+                    tigerHead.position.set(-1.8, 0.5, 0);
+                    group.add(tigerHead);
+
+                    // Stripes
+                    const stripeGeometry = new THREE.BoxGeometry(0.2, 0.1, 2.2);
+                    const stripeMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x000000
+                    });
+                    for (let i = 0; i < 5; i++) {
+                        const stripe = new THREE.Mesh(stripeGeometry, stripeMaterial);
+                        stripe.position.set(-2 + i * 0.8, 0.8, 0);
+                        stripe.rotation.z = Math.PI / 4;
+                        group.add(stripe);
+                    }
+
+                    // Legs
+                    const legGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 8);
+                    for (let i = 0; i < 4; i++) {
+                        const leg = new THREE.Mesh(legGeometry, tigerBodyMaterial);
+                        const x = i < 2 ? -1 : 1;
+                        const z = i % 2 === 0 ? -0.8 : 0.8;
+                        leg.position.set(x, -1, z);
+                        leg.rotation.x = Math.PI / 2;
+                        group.add(leg);
+                    }
+
+                    // Tail
+                    const tailGeometry = new THREE.CylinderGeometry(0.2, 0.1, 2, 8);
+                    const tail = new THREE.Mesh(tailGeometry, tigerBodyMaterial);
+                    tail.position.set(2, -0.5, 0);
+                    tail.rotation.z = Math.PI / 4;
+                    group.add(tail);
+                    break;
+
+                case 'eagle':
+                    // Body
+                    const eagleBodyGeometry = new THREE.SphereGeometry(1, 16, 16);
+                    const eagleBodyMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x8a5a44
+                    });
+                    const eagleBody = new THREE.Mesh(eagleBodyGeometry, eagleBodyMaterial);
+                    group.add(eagleBody);
+
+                    // Head
+                    const eagleHeadGeometry = new THREE.SphereGeometry(0.7, 16, 16);
+                    const eagleHead = new THREE.Mesh(eagleHeadGeometry, eagleBodyMaterial);
+                    eagleHead.position.set(0, 0, 1.2);
+                    group.add(eagleHead);
+
+                    // Beak
+                    const beakGeometry = new THREE.ConeGeometry(0.2, 0.8, 16);
+                    const beakMaterial = new THREE.MeshStandardMaterial({
+                        color: 0xe8a040
+                    });
+                    const beak = new THREE.Mesh(beakGeometry, beakMaterial);
+                    beak.position.set(0, 0, 1.8);
+                    beak.rotation.x = Math.PI / 2;
+                    group.add(beak);
+
+                    // Wings
+                    const wingGeometry = new THREE.PlaneGeometry(4, 1.5);
+                    const wingMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x5a3a24,
+                        side: THREE.DoubleSide
+                    });
+                    const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+                    leftWing.position.set(-2, 0, 0);
+                    leftWing.rotation.y = Math.PI / 2;
+                    leftWing.rotation.z = Math.PI / 4;
+                    group.add(leftWing);
+
+                    const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+                    rightWing.position.set(2, 0, 0);
+                    rightWing.rotation.y = Math.PI / 2;
+                    rightWing.rotation.z = -Math.PI / 4;
+                    group.add(rightWing);
+                    break;
+
+                case 'fox':
+                    // Body
+                    const foxBodyGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+                    const foxBodyMaterial = new THREE.MeshStandardMaterial({
+                        color: 0xe87a40
+                    });
+                    const foxBody = new THREE.Mesh(foxBodyGeometry, foxBodyMaterial);
+                    group.add(foxBody);
+
+                    // Head
+                    const foxHeadGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+                    const foxHead = new THREE.Mesh(foxHeadGeometry, foxBodyMaterial);
+                    foxHead.position.set(-1.5, 0, 0);
+                    group.add(foxHead);
+
+                    // Ears
+                    const earGeometry = new THREE.ConeGeometry(0.3, 0.8, 16);
+                    const leftEar = new THREE.Mesh(earGeometry, foxBodyMaterial);
+                    leftEar.position.set(-1.8, 0.8, 0);
+                    leftEar.rotation.z = Math.PI / 6;
+                    group.add(leftEar);
+
+                    const rightEar = new THREE.Mesh(earGeometry, foxBodyMaterial);
+                    rightEar.position.set(-1.2, 0.8, 0);
+                    rightEar.rotation.z = -Math.PI / 6;
+                    group.add(rightEar);
+
+                    // Tail
+                    const foxTailGeometry = new THREE.ConeGeometry(0.5, 3, 16);
+                    const foxTail = new THREE.Mesh(foxTailGeometry, foxBodyMaterial);
+                    foxTail.position.set(1.5, 0, 0);
+                    foxTail.rotation.z = Math.PI / 6;
+                    group.add(foxTail);
+                    break;
+
+                case 'wolf':
+                    // Similar to fox but different color and proportions
+                    const wolfBodyGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+                    const wolfBodyMaterial = new THREE.MeshStandardMaterial({
+                        color: 0xaaaaaa
+                    });
+                    const wolfBody = new THREE.Mesh(wolfBodyGeometry, wolfBodyMaterial);
+                    group.add(wolfBody);
+
+                    const wolfHeadGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+                    const wolfHead = new THREE.Mesh(wolfHeadGeometry, wolfBodyMaterial);
+                    wolfHead.position.set(-1.5, 0, 0);
+                    group.add(wolfHead);
+
+                    const wolfEarGeometry = new THREE.ConeGeometry(0.3, 0.8, 16);
+                    const wolfLeftEar = new THREE.Mesh(wolfEarGeometry, wolfBodyMaterial);
+                    wolfLeftEar.position.set(-1.8, 0.8, 0);
+                    wolfLeftEar.rotation.z = Math.PI / 6;
+                    group.add(wolfLeftEar);
+
+                    const wolfRightEar = new THREE.Mesh(wolfEarGeometry, wolfBodyMaterial);
+                    wolfRightEar.position.set(-1.2, 0.8, 0);
+                    wolfRightEar.rotation.z = -Math.PI / 6;
+                    group.add(wolfRightEar);
+
+                    const wolfTailGeometry = new THREE.ConeGeometry(0.4, 2, 16);
+                    const wolfTail = new THREE.Mesh(wolfTailGeometry, wolfBodyMaterial);
+                    wolfTail.position.set(1.5, 0, 0);
+                    wolfTail.rotation.z = Math.PI / 6;
+                    group.add(wolfTail);
+                    break;
+
+                case 'snake':
+                    // Create a snake with segments
+                    const segments = 10;
+                    const snakeSegmentGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+                    const snakeSegmentMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x5a8a44
+                    });
+
+                    for (let i = 0; i < segments; i++) {
+                        const segment = new THREE.Mesh(snakeSegmentGeometry, snakeSegmentMaterial);
+                        segment.position.x = i * 0.8;
+                        group.add(segment);
+                    }
+
+                    // Head
+                    const snakeHeadGeometry = new THREE.SphereGeometry(0.6, 16, 16);
+                    const snakeHead = new THREE.Mesh(snakeHeadGeometry, snakeSegmentMaterial);
+                    snakeHead.position.x = segments * 0.8;
+                    group.add(snakeHead);
+                    break;
+
+                case 'chameleon':
+                    // Body
+                    const chameleonBodyGeometry = new THREE.SphereGeometry(1, 16, 16);
+                    const chameleonBodyMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x5a8a44,
+                        transparent: true,
+                        opacity: 0.7
+                    });
+                    const chameleonBody = new THREE.Mesh(chameleonBodyGeometry, chameleonBodyMaterial);
+                    group.add(chameleonBody);
+
+                    // Head
+                    const chameleonHeadGeometry = new THREE.SphereGeometry(0.6, 16, 16);
+                    const chameleonHead = new THREE.Mesh(chameleonHeadGeometry, chameleonBodyMaterial);
+                    chameleonHead.position.set(-1, 0, 0);
+                    group.add(chameleonHead);
+
+                    // Eyes
+                    const eyeGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+                    const eyeMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x000000
+                    });
+                    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+                    leftEye.position.set(-1.2, 0.2, 0.4);
+                    group.add(leftEye);
+
+                    const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+                    rightEye.position.set(-1.2, 0.2, -0.4);
+                    group.add(rightEye);
+
+                    // Tail
+                    const chameleonTailGeometry = new THREE.ConeGeometry(0.3, 2, 16);
+                    const chameleonTail = new THREE.Mesh(chameleonTailGeometry, chameleonBodyMaterial);
+                    chameleonTail.position.set(1, 0, 0);
+                    chameleonTail.rotation.z = Math.PI / 6;
+                    group.add(chameleonTail);
+                    break;
+            }
+
+            predator = group;
+            predator.position.copy(new THREE.Vector3(
+                gameState.currentMission.predatorPosition.x,
+                gameState.currentMission.predatorPosition.y,
+                gameState.currentMission.predatorPosition.z
+            ));
+            scene.add(predator);
+
+            // Create physics body for predator
+            const predatorShape = new CANNON.Sphere(1.5);
+            const predatorBody = new CANNON.Body({
+                mass: 1
+            });
+            predatorBody.addShape(predatorShape);
+            predatorBody.position.copy(predator.position);
+            physicsWorld.addBody(predatorBody);
+
+            return predator;
+        }
+
+
+        // Create weather effects
+        function createWeatherEffects() {
+            const weather = WEATHER_DATA[gameState.currentMission.weather];
+
+            if (weather.particleDensity <= 0) return;
+
+            const particleCount = 1000 * weather.particleDensity;
+            const particles = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const sizes = new Float32Array(particleCount);
+
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = Math.random() * 200 - 100;
+                positions[i * 3 + 1] = Math.random() * 100;
+                positions[i * 3 + 2] = Math.random() * 200 - 100;
+
+                sizes[i] = Math.random() * 0.5 + 0.1;
+            }
+
+            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particles.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+            const material = new THREE.PointsMaterial({
+                color: new THREE.Color(weather.particleColor),
+                size: 0.1,
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: true
+            });
+
+            weatherParticles = new THREE.Points(particles, material);
+            scene.add(weatherParticles);
+        }
+
+        // Create lightning effect
+        function createLightning() {
+            const points = [];
+            points.push(new THREE.Vector3(0, 50, 0));
+
+            for (let i = 1; i < 10; i++) {
+                const x = Math.random() * 10 - 5;
+                const y = 50 - i * 5;
+                const z = Math.random() * 10 - 5;
+                points.push(new THREE.Vector3(x, y, z));
+            }
+
+            points.push(new THREE.Vector3(0, 0, 0));
+
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0
+            });
+
+            lightning = new THREE.Line(geometry, material);
+            scene.add(lightning);
+
+            return lightning;
+        }
+
+        // Initialize Game
+        function init() {
+            // Set up Three.js
+            initThreeJS();
+
+            // Create lightning effect (hidden by default)
+            createLightning();
+
+            // Check for saved game
+            loadGame();
+
+            // Set up event listeners
+            setupEventListeners();
+
+            // Show main menu
+            showMainMenu();
+
+            // Start animation loop
+            animate();
+        }
+
+        function setupEventListeners() {
+            // Keyboard controls
+            window.addEventListener('keydown', (e) => {
+                keys[e.key] = true;
+
+                // Pause game with ESC
+                if (e.key === 'Escape' && gameRunning) {
+                    togglePause();
+                }
+
+                // Handle other keys
+                if (e.key === 'ArrowLeft') controls.left = true;
+                if (e.key === 'ArrowRight') controls.right = true;
+                if (e.key === 'ArrowUp') controls.up = true;
+                if (e.key === ' ' || e.key === 'Spacebar') controls.action = true;
+                if (e.key === 'm' || e.key === 'M') controls.menu = true;
+            });
+
+            window.addEventListener('keyup', (e) => {
+                keys[e.key] = false;
+
+                if (e.key === 'ArrowLeft') controls.left = false;
+                if (e.key === 'ArrowRight') controls.right = false;
+                if (e.key === 'ArrowUp') controls.up = false;
+                if (e.key === ' ' || e.key === 'Spacebar') controls.action = false;
+                if (e.key === 'm' || e.key === 'M') controls.menu = false;
+            });
+
+            // Touch controls
+            buttons.left.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                controls.left = true;
+            });
+
+            buttons.left.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                controls.left = false;
+            });
+
+            buttons.right.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                controls.right = true;
+            });
+
+            buttons.right.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                controls.right = false;
+            });
+
+            buttons.up.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                controls.up = true;
+            });
+
+            buttons.up.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                controls.up = false;
+            });
+
+            buttons.action.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                controls.action = true;
+            });
+
+            buttons.action.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                controls.action = false;
+            });
+
+            buttons.menu.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                controls.menu = true;
+            });
+
+            buttons.menu.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                controls.menu = false;
+            });
+
+            // Mouse controls (for testing on desktop)
+            buttons.left.addEventListener('mousedown', () => controls.left = true);
+            buttons.left.addEventListener('mouseup', () => controls.left = false);
+            buttons.right.addEventListener('mousedown', () => controls.right = true);
+            buttons.right.addEventListener('mouseup', () => controls.right = false);
+            buttons.up.addEventListener('mousedown', () => controls.up = true);
+            buttons.up.addEventListener('mouseup', () => controls.up = false);
+            buttons.action.addEventListener('mousedown', () => controls.action = true);
+            buttons.action.addEventListener('mouseup', () => controls.action = false);
+            buttons.menu.addEventListener('mousedown', () => controls.menu = true);
+            buttons.menu.addEventListener('mouseup', () => controls.menu = false);
+
+            // Menu buttons
+            buttons.newGame.addEventListener('click', startNewGame);
+            buttons.continue.addEventListener('click', continueGame);
+            buttons.mythicBook.addEventListener('click', showMythicBook);
+            buttons.shop.addEventListener('click', showShop);
+            buttons.shopFromPause.addEventListener('click', () => {
+                togglePause();
+                showShop();
+            });
+            buttons.settings.addEventListener('click', showSettings);
+            buttons.resume.addEventListener('click', togglePause);
+            buttons.saveExit.addEventListener('click', saveAndExit);
+            buttons.bookFromPause.addEventListener('click', () => {
+                togglePause();
+                showMythicBook();
+            });
+            buttons.closeBook.addEventListener('click', hideMythicBook);
+            buttons.closeDetail.addEventListener('click', hidePageDetail);
+            buttons.continueJourney.addEventListener('click', continueJourney);
+            buttons.musicToggle.addEventListener('click', toggleMusic);
+            buttons.soundToggle.addEventListener('click', toggleSound);
+            buttons.difficultyButton.addEventListener('click', changeDifficulty);
+            buttons.autosaveToggle.addEventListener('click', toggleAutosave);
+            buttons.controlsHelpButton.addEventListener('click', showControlsHelp);
+            buttons.resetGameButton.addEventListener('click', resetGame);
+            buttons.closeSettingsButton.addEventListener('click', hideSettings);
+        }
+
+        // Game State Management
+        function loadGame() {
+            const savedGame = localStorage.getItem('owlOfMythsSave');
+
+            if (savedGame) {
+                try {
+                    const parsed = JSON.parse(savedGame);
+
+                    // Basic validation
+                    if (parsed.player && parsed.settings) {
+                        gameState = parsed;
+                        buttons.continue.style.display = 'block';
+
+                        // Update UI to reflect loaded state
+                        updateUI();
+                    }
+                } catch (e) {
+                    console.error("Failed to load saved game:", e);
+                }
+            } else {
+                buttons.continue.style.display = 'none';
+            }
+        }
+
+        function saveGame() {
+            try {
+                // Update player position before saving
+                if (owl) {
+                    gameState.player.position.x = owl.position.x;
+                    gameState.player.position.y = owl.position.y;
+                    gameState.player.position.z = owl.position.z;
+                }
+
+                localStorage.setItem('owlOfMythsSave', JSON.stringify(gameState));
+                console.log("Game saved successfully");
+            } catch (e) {
+                console.error("Failed to save game:", e);
+            }
+        }
+
+        function clearSavedGame() {
+            localStorage.removeItem('owlOfMythsSave');
+            buttons.continue.style.display = 'none';
+        }
+
+        // Menu Functions
+        function showMainMenu() {
+            elements.mainMenu.style.display = 'flex';
+            elements.pauseMenu.style.display = 'none';
+            elements.mythicBook.style.display = 'none';
+            elements.missionComplete.style.display = 'none';
+            elements.settingsMenu.style.display = 'none';
+            elements.shopMenu.style.display = 'none';
+            gameRunning = false;
+        }
+
+        function hideMainMenu() {
+            elements.mainMenu.style.display = 'none';
+        }
+
+        function togglePause() {
+            if (elements.pauseMenu.style.display === 'flex') {
+                elements.pauseMenu.style.display = 'none';
+                gameRunning = true;
+            } else {
+                elements.pauseMenu.style.display = 'flex';
+                gameRunning = false;
+            }
+        }
+
+        function showMythicBook() {
+            elements.mythicBook.style.display = 'flex';
+            renderMythicBook();
+        }
+
+        function hideMythicBook() {
+            elements.mythicBook.style.display = 'none';
+        }
+
+        function showPageDetail(predator) {
+            const data = PREDATOR_DATA[predator];
+
+            elements.detailTitle.textContent = data.name;
+            elements.detailContent.innerHTML = `
+                <p><strong>Description:</strong> ${data.description}</p>
+                <p><strong>Weakness:</strong> ${data.weakness}</p>
+                <p><strong>Tactics:</strong> ${data.tactics}</p>
+                <p><strong>Reward:</strong> ${data.reward} coins</p>
+            `;
+
+            elements.pageDetail.style.display = 'flex';
+        }
+
+        function hidePageDetail() {
+            elements.pageDetail.style.display = 'none';
+        }
+
+        function renderMythicBook() {
+            elements.pageContainer.innerHTML = '';
+
+            PREDATORS.forEach(predator => {
+                const isUnlocked = gameState.player.unlockedPages.includes(predator);
+                const data = PREDATOR_DATA[predator];
+
+                const page = document.createElement('div');
+                page.className = `page ${isUnlocked ? 'page-unlocked' : ''}`;
+                page.innerHTML = `
+                    <div class="page-icon">${isUnlocked ? '📖' : '❓'}</div>
+                    <div class="page-title">${data.name}</div>
+                    <div class="page-status">${isUnlocked ? 'UNLOCKED' : 'LOCKED'}</div>
+                `;
+
+                if (isUnlocked) {
+                    page.addEventListener('click', () => showPageDetail(predator));
+                }
+
+                elements.pageContainer.appendChild(page);
+            });
+        }
+
+        function showSettings() {
+            // Update toggle buttons to reflect current settings
+            buttons.musicToggle.textContent = gameState.settings.music ? 'ON' : 'OFF';
+            buttons.soundToggle.textContent = gameState.settings.sound ? 'ON' : 'OFF';
+            buttons.difficultyButton.textContent = gameState.settings.difficulty.toUpperCase();
+            buttons.autosaveToggle.textContent = gameState.settings.autoSave ? 'ON' : 'OFF';
+
+            elements.settingsMenu.style.display = 'flex';
+        }
+
+        function hideSettings() {
+            elements.settingsMenu.style.display = 'none';
+        }
+
+        function toggleMusic() {
+            gameState.settings.music = !gameState.settings.music;
+            buttons.musicToggle.textContent = gameState.settings.music ? 'ON' : 'OFF';
+
+            if (gameState.settings.music) {
+                audio.background.loop = true;
+                audio.background.volume = 0.3;
+                audio.background.play().catch(e => console.log("Audio play prevented:", e));
+            } else {
+                audio.background.pause();
+            }
+
+            saveGame();
+        }
+
+        function toggleSound() {
+            gameState.settings.sound = !gameState.settings.sound;
+            buttons.soundToggle.textContent = gameState.settings.sound ? 'ON' : 'OFF';
+            saveGame();
+        }
+
+        function changeDifficulty() {
+            const currentIndex = DIFFICULTIES.indexOf(gameState.settings.difficulty);
+            const nextIndex = (currentIndex + 1) % DIFFICULTIES.length;
+            gameState.settings.difficulty = DIFFICULTIES[nextIndex];
+            buttons.difficultyButton.textContent = gameState.settings.difficulty.toUpperCase();
+            saveGame();
+        }
+
+        function toggleAutosave() {
+            gameState.settings.autoSave = !gameState.settings.autoSave;
+            buttons.autosaveToggle.textContent = gameState.settings.autoSave ? 'ON' : 'OFF';
+            saveGame();
+        }
+
+        function showControlsHelp() {
+            alert(`Controls Help:
+- Left/Right: Move horizontally
+- Up: Fly upward
+- Action: Attack or interact
+- Menu: Open pause menu
+
+On mobile, use the on-screen buttons. On desktop, use arrow keys and spacebar.`);
+        }
+
+        function resetGame() {
+            if (confirm("Are you sure you want to reset the game? All progress will be lost.")) {
+                clearSavedGame();
+                location.reload();
+            }
+        }
+
+        function showShop() {
+            elements.shopCoinsValue.textContent = gameState.player.coins;
+            renderShopItems();
+            elements.shopMenu.style.display = 'flex';
+        }
+
+        function hideShop() {
+            elements.shopMenu.style.display = 'none';
+        }
+
+        function renderShopItems() {
+            elements.shopItems.innerHTML = '';
+
+            SHOP_ITEMS.forEach(item => {
+                const canAfford = gameState.player.coins >= item.price;
+                const alreadyOwned = !item.consumable && gameState.player.upgrades[item.id];
+
+                const shopItem = document.createElement('div');
+                shopItem.className = 'shop-item';
+                shopItem.innerHTML = `
+                    <div class="item-icon">${item.icon}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-price">${item.price} coins</div>
+                    <button class="item-button" ${!canAfford || alreadyOwned ? 'disabled' : ''}>
+                        ${alreadyOwned ? 'OWNED' : 'BUY'}
+                    </button>
+                `;
+
+                const button = shopItem.querySelector('.item-button');
+                if (!alreadyOwned && canAfford) {
+                    button.addEventListener('click', () => purchaseItem(item));
+                }
+
+                elements.shopItems.appendChild(shopItem);
+            });
+        }
+
+        function purchaseItem(item) {
+            if (gameState.player.coins >= item.price) {
+                gameState.player.coins -= item.price;
+                item.effect(gameState);
+                gameState.stats.coinsCollected += item.price;
+                gameState.stats.upgradesPurchased++;
+
+                // Play success sound
+                if (gameState.settings.sound) {
+                    audio.success.currentTime = 0;
+                    audio.success.play().catch(e => console.log("Audio play prevented:", e));
+                }
+
+                // Update UI
+                updateUI();
+                renderShopItems();
+                elements.shopCoinsValue.textContent = gameState.player.coins;
+
+                // Save game
+                if (gameState.settings.autoSave) {
+                    saveGame();
+                }
+            }
+        }
+
+        function showMissionComplete() {
+            const predator = PREDATOR_DATA[gameState.currentMission.predator];
+            elements.completeMessage.textContent = `You have captured the ${predator.name} and unlocked new knowledge! You earned ${predator.reward} coins.`;
+            elements.missionComplete.style.display = 'flex';
+
+            // Play success sound
+            if (gameState.settings.sound) {
+                audio.success.currentTime = 0;
+                audio.success.play().catch(e => console.log("Audio play prevented:", e));
+            }
+        }
+
+        // Game Functions
+        function startNewGame() {
+            // Reset game state
+            gameState = {
+                player: {
+                    health: 100,
+                    maxHealth: 100,
+                    stamina: 100,
+                    maxStamina: 100,
+                    speed: 5,
+                    coins: 0,
+                    distance: 0,
+                    position: {
+                        x: 0,
+                        y: 10,
+                        z: 0
+                    },
+                    velocity: {
+                        x: 0,
+                        y: 0,
+                        z: 0
+                    },
+                    upgrades: {
+                        staminaRecovery: 1,
+                        speed: 1,
+                        vision: 1,
+                        heatResistance: false,
+                        coldResistance: false,
+                        chameleonDetector: false
+                    },
+                    unlockedPredators: [],
+                    unlockedPages: [],
+                    inventory: []
+                },
+                currentMission: {
+                    predator: null,
+                    biome: null,
+                    season: null,
+                    weather: null,
+                    started: false,
+                    completed: false,
+                    startTime: 0,
+                    endTime: 0,
+                    predatorPosition: {
+                        x: 50,
+                        y: 0,
+                        z: 0
+                    },
+                    predatorHealth: 0
+                },
+                settings: {
+                    sound: true,
+                    music: true,
+                    difficulty: 'normal',
+                    autoSave: true
+                },
+                stats: {
+                    totalDistance: 0,
+                    predatorsCaptured: 0,
+                    deaths: 0,
+                    playTime: 0,
+                    coinsCollected: 0,
+                    upgradesPurchased: 0
+                }
+            };
+
+            // Start first mission
+            startNewMission();
+
+            // Hide menu and start game
+            hideMainMenu();
+            gameRunning = true;
+
+            // Start background music if enabled
+            if (gameState.settings.music) {
+                audio.background.loop = true;
+                audio.background.volume = 0.3;
+                audio.background.play().catch(e => console.log("Audio play prevented:", e));
+            }
+        }
+
+        function continueGame() {
+            // If no current mission, start a new one
+            if (!gameState.currentMission.predator || gameState.currentMission.completed) {
+                startNewMission();
+            }
+
+            // Hide menu and start game
+            hideMainMenu();
+            gameRunning = true;
+
+            // Start background music if enabled
+            if (gameState.settings.music) {
+                audio.background.loop = true;
+                audio.background.volume = 0.3;
+                audio.background.play().catch(e => console.log("Audio play prevented:", e));
+            }
+        }
+
+        function startNewMission() {
+            // Select a random predator (excluding already captured ones if we want)
+            const availablePredators = PREDATORS.filter(p => !gameState.player.unlockedPredators.includes(p));
+            const predator = availablePredators.length > 0 ?
+                availablePredators[Math.floor(Math.random() * availablePredators.length)] :
+                PREDATORS[Math.floor(Math.random() * PREDATORS.length)];
+
+            // Select biome based on predator preference
+            const biome = PREDATOR_DATA[predator].biome;
+
+            // Select random season and weather
+            const season = SEASONS[Math.floor(Math.random() * SEASONS.length)];
+            const weather = WEATHER[Math.floor(Math.random() * WEATHER.length)];
+
+            // Update game state
+            gameState.currentMission = {
+                predator,
+                biome,
+                season,
+                weather,
+                started: true,
+                completed: false,
+                startTime: Date.now(),
+                endTime: 0,
+                predatorPosition: {
+                    x: 50 + Math.random() * 30 - 15,
+                    y: 0,
+                    z: Math.random() * 30 - 15
+                },
+                predatorHealth: PREDATOR_DATA[predator].health
+            };
+
+            // Clear previous scene
+            clearScene();
+
+            // Create new environment
+            createTerrain();
+            createOwl();
+            createPredator();
+            createWeatherEffects();
+
+            // Update UI
+            updateUI();
+            updateEnvironmentInfo();
+        }
+
+        function clearScene() {
+            // Remove all objects from scene except camera and lights
+            while (scene.children.length > 0) {
+                const obj = scene.children[0];
+                if (obj !== camera && obj !== directionalLight && obj !== ambientLight && obj !== hemisphereLight) {
+                    scene.remove(obj);
+                }
+            }
+
+            // Clear physics world
+            while (physicsWorld.bodies.length > 0) {
+                physicsWorld.removeBody(physicsWorld.bodies[0]);
+            }
+
+            // Reinitialize ground plane
+            const groundShape = new CANNON.Plane();
+            const groundBody = new CANNON.Body({
+                mass: 0
+            });
+            groundBody.addShape(groundShape);
+            groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            physicsWorld.addBody(groundBody);
+        }
+
+        function completeMission() {
+            gameState.currentMission.completed = true;
+            gameState.currentMission.endTime = Date.now();
+
+            // Add to captured predators if not already
+            if (!gameState.player.unlockedPredators.includes(gameState.currentMission.predator)) {
+                gameState.player.unlockedPredators.push(gameState.currentMission.predator);
+                gameState.player.unlockedPages.push(gameState.currentMission.predator);
+                gameState.stats.predatorsCaptured++;
+            }
+
+            // Reward coins
+            const reward = PREDATOR_DATA[gameState.currentMission.predator].reward;
+            gameState.player.coins += reward;
+            gameState.stats.coinsCollected += reward;
+
+            // Update stats
+            gameState.stats.totalDistance += gameState.player.distance;
+            gameState.stats.playTime += (gameState.currentMission.endTime - gameState.currentMission.startTime) / 1000;
+
+            // Save game
+            if (gameState.settings.autoSave) {
+                saveGame();
+            }
+
+            // Show mission complete screen
+            showMissionComplete();
+        }
+
+        function continueJourney() {
+            elements.missionComplete.style.display = 'none';
+            startNewMission();
+            gameRunning = true;
+        }
+
+        function saveAndExit() {
+            saveGame();
+            togglePause();
+            showMainMenu();
+
+            // Stop background music
+            audio.background.pause();
+        }
+
+        function updateUI() {
+            // Update health and stamina bars
+            elements.healthBar.style.width = `${(gameState.player.health / gameState.player.maxHealth) * 100}%`;
+            elements.staminaBar.style.width = `${(gameState.player.stamina / gameState.player.maxStamina) * 100}%`;
+
+            // Update other values
+            elements.distanceValue.textContent = `${Math.round(gameState.player.distance)} KM`;
+
+            if (gameState.currentMission.predator) {
+                elements.targetValue.textContent = PREDATOR_DATA[gameState.currentMission.predator].name.toUpperCase();
+            } else {
+                elements.targetValue.textContent = "-";
+            }
+
+            elements.coinsValue.textContent = gameState.player.coins;
+        }
+
+        function updateEnvironmentInfo() {
+            if (gameState.currentMission.biome) {
+                elements.biomeValue.textContent = BIOME_DATA[gameState.currentMission.biome].name.toUpperCase();
+            } else {
+                elements.biomeValue.textContent = "-";
+            }
+
+            if (gameState.currentMission.season) {
+                elements.seasonValue.textContent = SEASON_DATA[gameState.currentMission.season].name.toUpperCase();
+            } else {
+                elements.seasonValue.textContent = "-";
+            }
+
+            if (gameState.currentMission.weather) {
+                elements.weatherValue.textContent = WEATHER_DATA[gameState.currentMission.weather].name.toUpperCase();
+            } else {
+                elements.weatherValue.textContent = "-";
+            }
+        }
+
+        function handleInput() {
+            if (!gameRunning || !owl) return;
+
+            // Handle movement
+            const speed = gameState.player.speed * 0.1;
+            const staminaCost = 0.1;
+
+            if (controls.left && gameState.player.stamina > 0) {
+                owl.position.x -= speed;
+                gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost);
+            }
+
+            if (controls.right && gameState.player.stamina > 0) {
+                owl.position.x += speed;
+                gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost);
+            }
+
+            if (controls.up && gameState.player.stamina > 0) {
+                owl.position.y += speed;
+                gameState.player.stamina = Math.max(0, gameState.player.stamina - staminaCost * 1.5);
+
+                // Play flap sound occasionally
+                if (gameState.settings.sound && Math.random() < 0.1) {
+                    audio.flap.currentTime = 0;
+                    audio.flap.play().catch(e => console.log("Audio play prevented:", e));
+                }
+            }
+
+            // Gravity - always pull down unless up is pressed
+            if (!controls.up) {
+                owl.position.y -= speed * 0.5;
+            }
+
+            // Ensure owl doesn't go below terrain
+            const terrainHeight = getTerrainHeight(owl.position.x, owl.position.z);
+            if (owl.position.y < terrainHeight + 1.5) {
+                owl.position.y = terrainHeight + 1.5;
+            }
+
+            // Action button - attack
+            if (controls.action && gameState.player.stamina > 10) {
+                // Check if close enough to predator
+                if (predator) {
+                    const distance = owl.position.distanceTo(predator.position);
+                    if (distance < 5) {
+                        // Attack predator
+                        gameState.currentMission.predatorHealth -= 10 + Math.random() * 10;
+                        gameState.player.stamina -= 10;
+
+                        // Play damage sound
+                        if (gameState.settings.sound) {
+                            audio.damage.currentTime = 0;
+                            audio.damage.play().catch(e => console.log("Audio play prevented:", e));
+                        }
+
+                        // Check if predator is defeated
+                        if (gameState.currentMission.predatorHealth <= 0) {
+                            completeMission();
+                            gameRunning = false;
+                        }
+                    }
+                }
+            }
+
+            // Menu button
+            if (controls.menu) {
+                togglePause();
+                controls.menu = false; // Prevent continuous toggling
+            }
+
+            // Stamina recovery
+            if (!controls.left && !controls.right && !controls.up) {
+                gameState.player.stamina = Math.min(
+                    gameState.player.maxStamina,
+                    gameState.player.stamina + 0.2 * gameState.player.upgrades.staminaRecovery
+                );
+            }
+
+            // Update distance (based on z position)
+            gameState.player.distance = Math.max(gameState.player.distance, Math.abs(owl.position.z) / 10);
+
+            // Update UI
+            updateUI();
+
+            // Move predator (simple AI)
+            if (predator && !gameState.currentMission.completed) {
+                // Simple chase behavior
+                const predatorInfo = PREDATOR_DATA[gameState.currentMission.predator];
+                const speed = predatorInfo.speed * 0.05;
+
+                // Move toward owl
+                const direction = new THREE.Vector3().subVectors(owl.position, predator.position).normalize();
+                predator.position.add(direction.multiplyScalar(speed));
+
+                // For flying predators (eagle), adjust y position
+                if (gameState.currentMission.predator === 'eagle') {
+                    predator.position.y = owl.position.y + (Math.sin(Date.now() * 0.001) * 3);
+                }
+
+                // Check if predator caught owl
+                const distance = owl.position.distanceTo(predator.position);
+                if (distance < 3) {
+                    // Owl takes damage
+                    gameState.player.health -= 5 + Math.random() * 5;
+
+                    // Play damage sound
+                    if (gameState.settings.sound) {
+                        audio.damage.currentTime = 0;
+                        audio.damage.play().catch(e => console.log("Audio play prevented:", e));
+                    }
+
+                    // Check if owl is dead
+                    if (gameState.player.health <= 0) {
+                        gameState.player.health = 0;
+                        gameState.stats.deaths++;
+
+                        // Reset position
+                        owl.position.set(0, 10, 0);
+                        gameState.player.health = gameState.player.maxHealth;
+                        gameState.player.stamina = gameState.player.maxStamina;
+
+                        // Save game
+                        if (gameState.settings.autoSave) {
+                            saveGame();
+                        }
+                    }
+                }
+            }
+        }
+
+        function animateLightning() {
+            if (!lightning) return;
+
+            const weather = WEATHER_DATA[gameState.currentMission.weather];
+            if (weather.lightningChance && Math.random() < weather.lightningChance) {
+                // Show lightning
+                lightning.material.opacity = 0.8;
+
+                // Play thunder sound
+                if (gameState.settings.sound) {
+                    audio.thunder.currentTime = 0;
+                    audio.thunder.play().catch(e => console.log("Audio play prevented:", e));
+                }
+
+                // Hide after short delay
+                setTimeout(() => {
+                    if (lightning) lightning.material.opacity = 0;
+                }, 100);
+            }
+        }
+
+        function animateWeather() {
+            if (!weatherParticles) return;
+
+            const weather = WEATHER_DATA[gameState.currentMission.weather];
+            if (weather.particleDensity > 0) {
+                // Animate particles falling
+                const positions = weatherParticles.geometry.attributes.position.array;
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i + 1] -= weather.particleSpeed * 0.5;
+
+                    // Reset particles that fall below
+                    if (positions[i + 1] < 0) {
+                        positions[i] = Math.random() * 200 - 100;
+                        positions[i + 1] = 100;
+                        positions[i + 2] = Math.random() * 200 - 100;
+                    }
+                }
+
+                weatherParticles.geometry.attributes.position.needsUpdate = true;
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Update physics
+            const deltaTime = clock.getDelta();
+            physicsWorld.step(fixedTimeStep, deltaTime, maxSubSteps);
+
+            // Handle input
+            handleInput();
+
+            // Update camera to follow owl
+            if (owl) {
+                camera.position.x = owl.position.x;
+                camera.position.z = owl.position.z + 30;
+                camera.lookAt(owl.position.x, owl.position.y, owl.position.z);
+
+                // Animate wings when flying
+                if (controls.up) {
+                    const wings = owl.children.filter(child =>
+                        child.name !== 'head' && child.name !== 'body'
+                    );
+                    wings.forEach(wing => {
+                        wing.rotation.x = Math.sin(Date.now() * 0.01) * 0.5;
+                    });
+                }
+            }
+
+            // Animate predator
+            if (predator && !gameState.currentMission.completed) {
+                // Simple idle animation
+                if (gameState.currentMission.predator === 'eagle') {
+                    // Flap wings
+                    const wings = predator.children.filter(child =>
+                        child.geometry instanceof THREE.PlaneGeometry
+                    );
+                    wings.forEach(wing => {
+                        wing.rotation.z = Math.sin(Date.now() * 0.01) * 0.5;
+                    });
+                } else if (gameState.currentMission.predator === 'snake') {
+                    // Wiggle snake
+                    const segments = predator.children;
+                    for (let i = 0; i < segments.length; i++) {
+                        segments[i].position.x += Math.sin(Date.now() * 0.001 + i * 0.3) * 0.01;
+                        segments[i].position.z += Math.cos(Date.now() * 0.001 + i * 0.3) * 0.01;
+                    }
+                }
+            }
+
+            // Animate weather effects
+            animateWeather();
+            animateLightning();
+
+            // Render scene
+            renderer.render(scene, camera);
+        }
+
+        // Initialize the game when the page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+
+</html>
