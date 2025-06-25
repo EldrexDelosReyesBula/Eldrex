@@ -1064,6 +1064,15 @@
                 particleSpeed: 0.2
             }
         };
+// Add a default weather type
+WEATHER_DATA.default = {
+    name: "Unknown",
+    effect: "Unknown weather conditions.",
+    staminaEffect: 1.0,
+    visibility: 1.0,
+    particleDensity: 0,
+    lightningChance: 0
+};
 
         const FOOD_DATA = {
             apple: {
@@ -2507,7 +2516,11 @@ On mobile, use the on-screen joystick and buttons.`);
 
             // Select random season and weather
             const season = SEASONS[Math.floor(Math.random() * SEASONS.length)];
-            const weather = WEATHER[Math.floor(Math.random() * WEATHER.length)];
+
+    // Ensure weather is valid
+    const availableWeathers = Object.keys(WEATHER_DATA).filter(k => k !== 'default');
+    const weather = availableWeathers[Math.floor(Math.random() * availableWeathers.length)];
+    
 
             // Update game state
             gameState.currentMission = {
@@ -2814,26 +2827,30 @@ On mobile, use the on-screen joystick and buttons.`);
             }
         }
 
-        function animateLightning() {
-            if (!lightning) return;
+function animateLightning() {
+    if (!lightning) return;
 
-            const weather = WEATHER_DATA[gameState.currentMission.weather];
-            if (weather.lightningChance && Math.random() < weather.lightningChance) {
-                // Show lightning
-                lightning.material.opacity = 0.8;
+    // Safely get weather data with fallback
+    const weather = WEATHER_DATA[gameState.currentMission.weather] || WEATHER_DATA.default;
+    
+    // Check if lightningChance exists and is > 0
+    const lightningChance = weather.lightningChance || 0;
+    if (lightningChance > 0 && Math.random() < lightningChance) {
+        // Show lightning
+        lightning.material.opacity = 0.8;
 
-                // Play thunder sound
-                if (gameState.settings.sound) {
-                    audio.thunder.currentTime = 0;
-                    audio.thunder.play().catch(e => console.log("Audio play prevented:", e));
-                }
-
-                // Hide after short delay
-                setTimeout(() => {
-                    if (lightning) lightning.material.opacity = 0;
-                }, 100);
-            }
+        // Play thunder sound
+        if (gameState.settings.sound) {
+            audio.thunder.currentTime = 0;
+            audio.thunder.play().catch(e => console.log("Audio play prevented:", e));
         }
+
+        // Hide after short delay
+        setTimeout(() => {
+            if (lightning) lightning.material.opacity = 0;
+        }, 100);
+    }
+}
 
         function animateWeather() {
             if (!weatherParticles) return;
