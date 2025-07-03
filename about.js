@@ -135,11 +135,11 @@
                     author: "Eldrex Delos Reyes Bula"
                 },
                 {
-                    text: "",
+                    text:"Even the longest night ends with a sunrise.",
                     author: "Eldrex Delos Reyes Bula"
                 },
                 {
-                    text: "",
+                    text: "Those who dare to be misunderstood often become the ones worth remembering.",
                     author: "Eldrex Delos Reyes Bula"
                 },
                 {
