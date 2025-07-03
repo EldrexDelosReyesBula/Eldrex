@@ -97,6 +97,46 @@
                 {
                     text: "A mother’s gift isn’t measured by how it looks, but by the love that came with it.",
                     author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "A seed doesn’t ask for perfect soil, nor does it wait for the perfect rain. It simply grows where it’s planted, reaching for light with whatever it can find.",
+                    author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "If you can question everything, you can understand anything.",
+                    author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "“A child’s heart remembers the warmth of home, even when life keeps them far away.”",
+                    author: "Eldrex Delos Reyes Bula"
+                },                
+                {
+                    text: "Hoping to be enough, just as I am",
+                    author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "Fly again, My blue",
+                    author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "Time moves so slow, yet I blink, and everything is gone.",
+                    author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "I thought I wanted freedom, but now I just want one more yesterday.",
+                    author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "A road without signs is only a problem if you believe you're going somewhere.",
+                    author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "A recipe followed perfectly still tastes different in someone else’s hands.",
+                    author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "We’ve waited for this day, but now we’re wishing for one more.",
+                    author: "Eldrex Delos Reyes Bula"
                 }
             ]
         };
