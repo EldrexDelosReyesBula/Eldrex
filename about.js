@@ -109,7 +109,7 @@
                 {
                     text: "“A child’s heart remembers the warmth of home, even when life keeps them far away.”",
                     author: "Eldrex Delos Reyes Bula"
-                },                
+                },
                 {
                     text: "Hoping to be enough, just as I am",
                     author: "Eldrex Delos Reyes Bula"
@@ -132,6 +132,14 @@
                 },
                 {
                     text: "A recipe followed perfectly still tastes different in someone else’s hands.",
+                    author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "",
+                    author: "Eldrex Delos Reyes Bula"
+                },
+                {
+                    text: "",
                     author: "Eldrex Delos Reyes Bula"
                 },
                 {
@@ -332,49 +340,3 @@
         }
 
         document.addEventListener('DOMContentLoaded', init);
-
-        setTimeout(() => {
-            const projectsContent = document.getElementById("projects-content");
-            projectsContent.style.transform = "scale(0.98)";
-
-            setTimeout(() => {
-                projectsContent.style.transition = "all 0.6s cubic-bezier(0.32, 0.72, 0, 1)";
-                projectsContent.style.transform = "scale(1)";
-                projectsContent.innerHTML = `
-      <div class="empty-state">
-        <img 
-          class="empty-icon" 
-          src="https://eldrexdelosreyesbula.github.io/Eldrex/connect.svg" 
-          style="
-            width: 80%; 
-            height: 80%;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            pointer-events: none;
-            -webkit-user-drag: none;
-            -khtml-user-drag: none;
-            -moz-user-drag: none;
-            -o-user-drag: none;
-            user-drag: none;
-          " 
-          alt="No projects icon"
-          oncontextmenu="return false;"
-          ondragstart="return false;"
-        >
-        <h3 class="empty-title">No Projects Yet</h3>
-        <p class="empty-description">It looks like there aren't any projects here yet.</p>
-      </div><br><br>
-    `;
-
-                // Animate in the empty state
-                setTimeout(() => {
-                    const emptyState = document.querySelector(".empty-state");
-                    if (emptyState) {
-                        emptyState.style.opacity = "1";
-                        emptyState.style.transform = "translateY(0)";
-                    }
-                }, 50);
-            }, 150);
-        }, 7000);
